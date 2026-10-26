@@ -20,6 +20,16 @@ PrivateBin answers
     ${page} =    Get page    /
     Should Contain    ${page}    <title>CI "Paste" $HOME</title>
 
+Post a document from
+    [Arguments]    ${forwarded_for}
+    # Straight to the app port: Traefik would replace X-Forwarded-For with the
+    # test runner address. The body is not a valid document, PrivateBin answers
+    # "Invalid data" once the address checks pass.
+    ${port} =    Execute Command    runagent -m ${module_id} sh -c 'grep ^TCP_PORT= environment | cut -d= -f2'
+    ${answer} =    Execute Command
+    ...    curl -s -H 'X-Requested-With: JSONHttpRequest' -H 'X-Forwarded-For: ${forwarded_for}' --data '{"v":2,"ct":"x"}' http://127.0.0.1:${port}/
+    RETURN    ${answer}
+
 *** Test Cases ***
 Check if privatebin is installed correctly
     ${output}  ${rc} =    Execute Command    add-module ${IMAGE_URL} 1
@@ -69,6 +79,20 @@ Check if the delay between documents is applied
     ${conf} =    Execute Command    runagent -m ${module_id} grep -E "^(limit|creators)" privatebin/conf.php
     Should Contain    ${conf}    limit = 45
     Should Not Contain    ${conf}    creators
+    ${first} =    Post a document from    203.0.113.7
+    Should Contain    ${first}    Invalid data
+    ${second} =    Post a document from    203.0.113.7
+    Should Contain    ${second}    Please wait 45 seconds
+    # The delay counts per address
+    ${other} =    Post a document from    203.0.113.8
+    Should Contain    ${other}    Invalid data
+
+Check if the size limits follow the setting
+    ${nginx} =    Execute Command    runagent -m ${module_id} cat privatebin/nginx.conf
+    Should Contain    ${nginx}    client_max_body_size 22M;
+    ${php} =    Execute Command    runagent -m ${module_id} cat privatebin/php.ini
+    Should Contain    ${php}    post_max_size=22M
+    Should Contain    ${php}    upload_max_filesize=22M
 
 Check if the custom logo is served
     ${svg} =    Get page    /img/icon.svg
@@ -82,6 +106,32 @@ Check if the original logo comes back
     ...    PrivateBin answers
     ${svg} =    Get page    /img/icon.svg
     Should Not Contain    ${svg}    data:image/png
+
+Check if only private networks can create documents
+    Run task    module/${module_id}/configure-module    {${BASE_CONFIG.replace('"private_creators":false', '"private_creators":true')}}
+    Wait Until Keyword Succeeds    20 times    3 seconds
+    ...    PrivateBin answers
+    ${lan} =    Post a document from    192.168.1.5
+    Should Contain    ${lan}    Invalid data
+    # No delay for the creators networks
+    ${again} =    Post a document from    192.168.1.5
+    Should Contain    ${again}    Invalid data
+    ${internet} =    Post a document from    8.8.8.8
+    Should Contain    ${internet}    not authorized
+    # Behind a trusted proxy the list is read from the right: the first public address is the visitor
+    ${proxied_lan} =    Post a document from    192.168.1.5, 10.0.0.1
+    Should Contain    ${proxied_lan}    Invalid data
+    ${proxied_internet} =    Post a document from    192.168.1.5, 8.8.8.8, 10.0.0.1
+    Should Contain    ${proxied_internet}    not authorized
+
+Check if an update keeps the configuration
+    Run task    module/${module_id}/configure-module    {${BASE_CONFIG}}
+    Run task    update-module    {"module_url":"${IMAGE_URL}","instances":["${module_id}"],"force":true}
+    ${config} =    Run task    module/${module_id}/get-configuration    {}
+    Should Be Equal    ${config}[name]    CI "Paste" $HOME
+    Should Be Equal As Integers    ${config}[rate_limit]    45
+    Wait Until Keyword Succeeds    20 times    3 seconds
+    ...    PrivateBin answers
 
 Check if the purge timer is active
     ${output}  ${rc} =    Execute Command    runagent -m ${module_id} systemctl --user is-active privatebin-purge.timer
