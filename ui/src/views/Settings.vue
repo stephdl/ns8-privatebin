@@ -750,7 +750,7 @@ export default {
             .split("\n")
             .filter((detail) => detail.trim() !== "");
         } else {
-          this.error[param] = this.$t("settings." + validationError.error);
+          this.error[param] = "settings." + validationError.error;
           if (!focusAlreadySet && param !== "logo") {
             this.focusElement(param);
             focusAlreadySet = true;
