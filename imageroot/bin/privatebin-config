@@ -84,8 +84,8 @@ sections = {
     "expire": {"default": ini_string(settings["expire_default"])},
     # PrivateBin replaces the whole list with this section
     "expire_options": {name: str(seconds) for name, seconds in expire_options},
-    # Traefik replaces any client value, so the header holds the real visitor IP
-    "traffic": {"limit": "10", "header": ini_string("X_FORWARDED_FOR")},
+    # nginx puts the visitor IP in REMOTE_ADDR, see nginx.conf below
+    "traffic": {"limit": "10"},
     "model": {"class": "Filesystem"},
     # PrivateBin refuses to start without this section, PATH is a PHP constant
     "model_options": {"dir": 'PATH "data"'},
@@ -109,7 +109,15 @@ write_file("privatebin/php.ini", "".join([
     # PHP holds the request body and its decoded JSON in memory at the same time
     f"memory_limit={max(128, 4 * size_limit + 64)}M\n",
 ]))
-write_file("privatebin/nginx.conf", f"client_max_body_size {body_limit}M;\n")
+# X-Forwarded-For becomes a list behind Traefik trusted proxies. Reading it from the
+# right, the first public address is the visitor: a forged value further left is ignored.
+real_ip = "".join(f"set_real_ip_from {network};\n" for network in PRIVATE_NETWORKS.split(","))
+write_file("privatebin/nginx.conf", "".join([
+    f"client_max_body_size {body_limit}M;\n",
+    real_ip,
+    "real_ip_header X-Forwarded-For;\n",
+    "real_ip_recursive on;\n",
+]))
 
 state_dir = os.environ.get("AGENT_STATE_DIR", os.getcwd())
 if os.path.isfile("privatebin/icon.svg"):
