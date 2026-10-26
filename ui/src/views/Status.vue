@@ -61,7 +61,7 @@
               <div class="card-rows">
                 <div class="card-row">
                   <NsButton
-                    v-if="host"
+                    v-if="host && isRouteConfigured"
                     kind="ghost"
                     :icon="Launch20"
                     :disabled="loading.getConfiguration"
@@ -403,6 +403,7 @@ export default {
       urlCheckInterval: null,
       isRedirectChecked: false,
       redirectTimeout: 0,
+      isRouteConfigured: false,
       host: "",
       status: {
         instance: "",
@@ -538,6 +539,7 @@ export default {
     getConfigurationCompleted(taskContext, taskResult) {
       const config = taskResult.output;
       this.host = config.host;
+      this.isRouteConfigured = config.route_configured;
       this.loading.getConfiguration = false;
     },
     i18nColumns(cols) {
