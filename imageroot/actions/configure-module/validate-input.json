@@ -20,7 +20,8 @@
             "size_limit": 10,
             "language_selection": true,
             "language_default": "auto",
-            "private_creators": true
+            "private_creators": true,
+            "rate_limit": 30
         }
     ],
     "type": "object",
@@ -40,7 +41,8 @@
         "size_limit",
         "language_selection",
         "language_default",
-        "private_creators"
+        "private_creators",
+        "rate_limit"
     ],
     "definitions": {
         "expire": {
@@ -135,6 +137,20 @@
         "private_creators": {
             "type": "boolean",
             "description": "Only clients from private networks can create documents, anyone can read a link"
+        },
+        "rate_limit": {
+            "description": "Seconds between two documents from the same IP when creation is public, 0 disables the limit",
+            "oneOf": [
+                {
+                    "type": "integer",
+                    "const": 0
+                },
+                {
+                    "type": "integer",
+                    "minimum": 10,
+                    "maximum": 300
+                }
+            ]
         }
     }
 }

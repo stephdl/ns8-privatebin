@@ -34,29 +34,6 @@
         <cv-tile light>
           <cv-form @submit.prevent="configureModule">
             <h4 class="mg-bottom-md">{{ $t("settings.web_access") }}</h4>
-            <NsInlineNotification
-              kind="info"
-              :title="$t('settings.public_service_title')"
-              :description="$t('settings.public_service_description')"
-              :showCloseButton="false"
-            />
-            <NsToggle
-              value="privateCreators"
-              :label="$t('settings.private_creators')"
-              v-model="isPrivateCreators"
-              :disabled="stillLoading"
-              class="mg-bottom"
-            >
-              <template #tooltip>
-                {{ $t("settings.private_creators_tooltip") }}
-              </template>
-              <template slot="text-left">{{
-                $t("settings.disabled")
-              }}</template>
-              <template slot="text-right">{{
-                $t("settings.enabled")
-              }}</template>
-            </NsToggle>
             <NsTextInput
               :label="$t('settings.privatebin_fqdn')"
               placeholder="privatebin.example.org"
@@ -108,6 +85,83 @@
               "
               :showCloseButton="false"
             />
+
+            <h4 class="mg-bottom-md mg-top">
+              {{ $t("settings.document_creation") }}
+            </h4>
+            <NsInlineNotification
+              v-if="isPrivateCreators"
+              kind="info"
+              :title="$t('settings.creation_private_title')"
+              :description="$t('settings.creation_private_description')"
+              :showCloseButton="false"
+            />
+            <NsInlineNotification
+              v-else
+              kind="warning"
+              :title="$t('settings.creation_public_title')"
+              :description="$t('settings.creation_public_description')"
+              :showCloseButton="false"
+            />
+            <NsToggle
+              value="privateCreators"
+              :label="$t('settings.private_creators')"
+              v-model="isPrivateCreators"
+              :disabled="stillLoading"
+              class="mg-bottom"
+            >
+              <template #tooltip>
+                {{ $t("settings.private_creators_tooltip") }}
+              </template>
+              <template slot="text-left">{{
+                $t("settings.disabled")
+              }}</template>
+              <template slot="text-right">{{
+                $t("settings.enabled")
+              }}</template>
+            </NsToggle>
+            <template v-if="!isPrivateCreators">
+              <NsToggle
+                value="rateLimit"
+                :label="$t('settings.rate_limit')"
+                v-model="isRateLimitEnabled"
+                :disabled="stillLoading"
+                class="mg-bottom"
+              >
+                <template #tooltip>
+                  {{ $t("settings.rate_limit_tooltip") }}
+                </template>
+                <template slot="text-left">{{
+                  $t("settings.disabled")
+                }}</template>
+                <template slot="text-right">{{
+                  $t("settings.enabled")
+                }}</template>
+              </NsToggle>
+              <NsSlider
+                v-if="isRateLimitEnabled"
+                v-model="rateLimit"
+                :label="$t('settings.rate_limit_delay')"
+                min="10"
+                max="300"
+                step="5"
+                stepMultiplier="6"
+                minLabel=""
+                maxLabel=""
+                :unitLabel="$t('settings.seconds')"
+                :invalidMessage="$t(error.rate_limit)"
+                :disabled="stillLoading"
+                class="mg-bottom mg-left maxwidth"
+                ref="rate_limit"
+              />
+              <NsInlineNotification
+                v-if="!isRateLimitEnabled"
+                kind="warning"
+                :title="$t('settings.no_limit_title')"
+                :description="$t('settings.no_limit_description')"
+                :showCloseButton="false"
+              />
+            </template>
 
             <cv-accordion ref="accordion" class="maxwidth mg-bottom mg-top">
               <cv-accordion-item :open="toggleAccordion[0]">
@@ -301,7 +355,7 @@
                       :unitLabel="$t('settings.mib')"
                       :invalidMessage="$t(error.size_limit)"
                       :disabled="stillLoading"
-                      class="mg-bottom maxwidth"
+                      class="mg-bottom mg-left maxwidth"
                       ref="size_limit"
                     />
                     <NsInlineNotification
@@ -502,6 +556,8 @@ export default {
       sizeLimit: "10",
       isLanguageSelectionEnabled: true,
       isPrivateCreators: true,
+      isRateLimitEnabled: true,
+      rateLimit: "30",
       loading: {
         getConfiguration: false,
         configureModule: false,
@@ -520,6 +576,7 @@ export default {
         expire_default: "",
         expire_max: "",
         size_limit: "",
+        rate_limit: "",
         language_default: "",
       },
     };
@@ -582,7 +639,7 @@ export default {
     },
     openAdvancedFor(field) {
       // a hidden field cannot show its error nor take the focus
-      if (!["host", "lets_encrypt"].includes(field)) {
+      if (!["host", "lets_encrypt", "rate_limit"].includes(field)) {
         this.$set(this.toggleAccordion, 0, true);
       }
     },
@@ -718,6 +775,8 @@ export default {
       this.sizeLimit = String(config.size_limit);
       this.isLanguageSelectionEnabled = config.language_selection;
       this.isPrivateCreators = config.private_creators;
+      this.isRateLimitEnabled = config.rate_limit > 0;
+      this.rateLimit = String(config.rate_limit > 0 ? config.rate_limit : 30);
 
       this.loading.getConfiguration = false;
       this.focusElement("host");
@@ -815,6 +874,7 @@ export default {
         language_selection: this.isLanguageSelectionEnabled,
         language_default: this.languageDefault,
         private_creators: this.isPrivateCreators,
+        rate_limit: this.isRateLimitEnabled ? parseInt(this.rateLimit, 10) : 0,
       };
       // without the logo key the backend keeps the current logo
       if (this.logoData) {
@@ -878,6 +938,10 @@ export default {
 
 .maxwidth {
   max-width: 38rem;
+}
+
+.mg-left {
+  margin-left: $spacing-07;
 }
 
 .logo-row {

@@ -85,7 +85,8 @@ sections = {
     # PrivateBin replaces the whole list with this section
     "expire_options": {name: str(seconds) for name, seconds in expire_options},
     # nginx puts the visitor IP in REMOTE_ADDR, see nginx.conf below
-    "traffic": {"limit": "10"},
+    # PrivateBin skips this limit for the creators networks
+    "traffic": {"limit": str(int(settings["rate_limit"]))},
     "model": {"class": "Filesystem"},
     # PrivateBin refuses to start without this section, PATH is a PHP constant
     "model_options": {"dir": 'PATH "data"'},

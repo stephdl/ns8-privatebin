@@ -46,8 +46,6 @@
     "no_route_title": "This instance has no web address",
     "no_route_description": "This instance has no web route, for example after a clone. Set a new host name and save to publish it.",
     "privatebin_fqdn": "PrivateBin host name",
-    "public_service_title": "Public service",
-    "public_service_description": "PrivateBin has no login. Without a limit, anyone who can reach the host name can create documents. Documents are encrypted in the browser: the server never sees their content.",
     "branding": "Branding",
     "name": "Service name",
     "name_helper": "Shown in the browser title and the navigation bar",
@@ -96,8 +94,19 @@
     "expire_1year": "1 year",
     "expire_never": "Never",
     "private_creators": "Create documents from private networks only",
-    "private_creators_tooltip": "Only clients from private networks (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7) can create documents. Anyone can still open a link, so you can share a document with someone outside. This keeps bots on the Internet from filling the disk.",
-    "advanced": "Advanced"
+    "private_creators_tooltip": "Recommended. Only private networks can create documents or comments, with no delay. Other addresses get an error. Reading a link works from anywhere. Turn it off to let the Internet create documents, then set a delay below.",
+    "advanced": "Advanced",
+    "document_creation": "Document creation",
+    "creation_private_title": "Only your networks can create documents",
+    "creation_private_description": "Clients from private networks (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7) create documents without limit. Anyone can open a link, so you can share a document with someone outside. Requests to create a document from the Internet are refused.",
+    "creation_public_title": "Anyone on the Internet can create documents",
+    "creation_public_description": "PrivateBin has no login. Bots can fill the disk with documents. Keep a delay between two documents from the same address, a short longest expiration and a small size limit.",
+    "rate_limit": "Delay between documents",
+    "rate_limit_tooltip": "Only applies when creation is open to the Internet. After a document or a comment, the same address must wait this long before the next one, otherwise PrivateBin refuses it. This slows down bots that post in a loop, but a bot with many addresses is not stopped.",
+    "rate_limit_delay": "Delay for the same address, from 10 to 300 seconds",
+    "seconds": "seconds",
+    "no_limit_title": "No delay",
+    "no_limit_description": "A bot can create documents as fast as the server answers."
   },
   "about": {
     "title": "About"

@@ -12,5 +12,6 @@
     "size_limit": 10,
     "language_selection": true,
     "language_default": "auto",
-    "private_creators": true
+    "private_creators": true,
+    "rate_limit": 30
 }

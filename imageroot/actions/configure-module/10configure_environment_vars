@@ -27,6 +27,7 @@ SETTINGS = [
     "language_selection",
     "language_default",
     "private_creators",
+    "rate_limit",
 ]
 
 

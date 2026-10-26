@@ -46,8 +46,6 @@
     "no_route_title": "Cette instance n'a pas d'adresse web",
     "no_route_description": "Cette instance n'a pas de route web, par exemple après un clonage. Indiquez un nouveau nom d'hôte et enregistrez pour la publier.",
     "privatebin_fqdn": "Nom d'hôte de PrivateBin",
-    "public_service_title": "Service public",
-    "public_service_description": "PrivateBin n'a pas de connexion. Sans limite, toute personne qui atteint le nom d'hôte peut créer des documents. Les documents sont chiffrés dans le navigateur : le serveur ne voit jamais leur contenu.",
     "branding": "Personnalisation",
     "name": "Nom du service",
     "name_helper": "Affiché dans le titre du navigateur et la barre de navigation",
@@ -96,8 +94,19 @@
     "expire_1year": "1 an",
     "expire_never": "Jamais",
     "private_creators": "Création réservée aux réseaux privés",
-    "private_creators_tooltip": "Seuls les clients des réseaux privés (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7) peuvent créer des documents. Tout le monde peut ouvrir un lien, vous pouvez donc partager un document avec une personne externe. Les bots d'Internet ne peuvent pas remplir le disque.",
-    "advanced": "Avancé"
+    "private_creators_tooltip": "Recommandé. Seuls les réseaux privés créent des documents ou des commentaires, sans délai. Les autres adresses reçoivent une erreur. La lecture d'un lien marche depuis partout. Désactivez-le pour ouvrir la création à Internet, puis réglez un délai ci-dessous.",
+    "advanced": "Avancé",
+    "document_creation": "Création des documents",
+    "creation_private_title": "Seuls vos réseaux peuvent créer des documents",
+    "creation_private_description": "Les clients des réseaux privés (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7) créent des documents sans limite. Tout le monde peut ouvrir un lien, vous pouvez donc partager un document avec une personne externe. Les créations depuis Internet sont refusées.",
+    "creation_public_title": "Tout Internet peut créer des documents",
+    "creation_public_description": "PrivateBin n'a pas de connexion. Des bots peuvent remplir le disque de documents. Gardez un délai entre deux documents d'une même adresse, une expiration courte et une petite taille maximale.",
+    "rate_limit": "Délai entre deux documents",
+    "rate_limit_tooltip": "S'applique seulement quand la création est ouverte à Internet. Après un document ou un commentaire, une même adresse doit attendre ce délai avant le suivant, sinon PrivateBin le refuse. Cela ralentit les bots qui publient en boucle, mais un bot avec beaucoup d'adresses n'est pas arrêté.",
+    "rate_limit_delay": "Délai pour une même adresse, de 10 à 300 secondes",
+    "seconds": "secondes",
+    "no_limit_title": "Aucun délai",
+    "no_limit_description": "Un bot peut créer des documents aussi vite que le serveur répond."
   },
   "about": {
     "title": "À propos"

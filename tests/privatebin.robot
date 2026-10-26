@@ -5,7 +5,7 @@ Resource    api.resource
 *** Variables ***
 # Any resolvable-looking name: the schema demands a dot, nothing resolves it.
 ${TEST_HOST}    privatebin.ns8-ci.test
-${BASE_CONFIG}    "host":"${TEST_HOST}","lets_encrypt":false,"name":"CI \\"Paste\\" $HOME","notice":"Test banner","info":"","expire_default":"1day","expire_max":"1month","discussion":true,"open_discussion":false,"burn_after_reading_selected":false,"qrcode":true,"file_upload":true,"size_limit":20,"language_selection":true,"language_default":"auto","private_creators":false
+${BASE_CONFIG}    "host":"${TEST_HOST}","lets_encrypt":false,"name":"CI \\"Paste\\" $HOME","notice":"Test banner","info":"","expire_default":"1day","expire_max":"1month","discussion":true,"open_discussion":false,"burn_after_reading_selected":false,"qrcode":true,"file_upload":true,"size_limit":20,"language_selection":true,"language_default":"auto","private_creators":false,"rate_limit":45
 # 1x1 PNG
 ${LOGO}    iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==
 
@@ -64,6 +64,11 @@ Check if privatebin answers with the settings
     Should Contain    ${page}    Test banner
     Should Contain    ${page}    value="1month"
     Should Not Contain    ${page}    value="1year"
+
+Check if the delay between documents is applied
+    ${conf} =    Execute Command    runagent -m ${module_id} grep -E "^(limit|creators)" privatebin/conf.php
+    Should Contain    ${conf}    limit = 45
+    Should Not Contain    ${conf}    creators
 
 Check if the custom logo is served
     ${svg} =    Get page    /img/icon.svg
