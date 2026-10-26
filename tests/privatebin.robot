@@ -66,8 +66,8 @@ Check if privatebin answers with the settings
     Should Not Contain    ${page}    value="1year"
 
 Check if the custom logo is served
-    ${logo} =    Get page    /img/icon.svg
-    Should Contain    ${logo}    data:image/png;base64,${LOGO}
+    ${svg} =    Get page    /img/icon.svg
+    Should Contain    ${svg}    data:image/png;base64,${LOGO}
 
 Check if the original logo comes back
     Run task    module/${module_id}/configure-module    {${BASE_CONFIG},"logo":""}
@@ -75,8 +75,8 @@ Check if the original logo comes back
     Should Not Be True    ${config}[logo_set]
     Wait Until Keyword Succeeds    20 times    3 seconds
     ...    PrivateBin answers
-    ${logo} =    Get page    /img/icon.svg
-    Should Not Contain    ${logo}    data:image/png
+    ${svg} =    Get page    /img/icon.svg
+    Should Not Contain    ${svg}    data:image/png
 
 Check if the purge timer is active
     ${output}  ${rc} =    Execute Command    runagent -m ${module_id} systemctl --user is-active privatebin-purge.timer
