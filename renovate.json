@@ -2,5 +2,24 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>NethServer/.github:ns8-automerge"
+  ],
+  "packageRules": [
+    {
+      "description": "Only the plain PrivateBin release tags, not the alpine and php variants",
+      "matchDepNames": [
+        "docker.io/privatebin/nginx-fpm-alpine"
+      ],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
+      "description": "A PrivateBin major upgrade can change the configuration or the storage format: review it by hand",
+      "matchDepNames": [
+        "docker.io/privatebin/nginx-fpm-alpine"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    }
   ]
 }

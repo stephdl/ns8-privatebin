@@ -1,0 +1,14 @@
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+[Unit]
+Description=Delete expired PrivateBin documents
+Requisite=privatebin-app.service
+After=privatebin-app.service
+
+[Service]
+Type=oneshot
+SyslogIdentifier=%N
+ExecStart=/usr/bin/podman exec privatebin-app administration --purge

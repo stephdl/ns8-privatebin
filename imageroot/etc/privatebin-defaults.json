@@ -1,0 +1,15 @@
+{
+    "name": "PrivateBin",
+    "notice": "",
+    "info": "",
+    "expire_default": "1week",
+    "expire_max": "1year",
+    "discussion": true,
+    "open_discussion": false,
+    "burn_after_reading_selected": false,
+    "qrcode": true,
+    "file_upload": false,
+    "size_limit": 10,
+    "language_selection": true,
+    "language_default": "auto"
+}

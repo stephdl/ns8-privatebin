@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import os
+import sys
+import json
+import agent
+
+request = json.load(sys.stdin)
+renv = request['environment']
+
+# The backup restored settings.json: replay it through configure-module
+with open(os.environ["AGENT_INSTALL_DIR"] + "/etc/privatebin-defaults.json") as fi:
+    data = json.load(fi)
+try:
+    with open("privatebin/settings.json") as fi:
+        data.update(json.load(fi))
+except FileNotFoundError:
+    print(agent.SD_WARNING + "No PrivateBin settings in the backup, using the defaults", file=sys.stderr)
+
+data["host"] = renv["TRAEFIK_HOST"]
+data["lets_encrypt"] = renv.get("TRAEFIK_LETS_ENCRYPT") == "True"
+
+configure_retval = agent.tasks.run(agent_id=os.environ['AGENT_ID'], action='configure-module', data=data)
+agent.assert_exp(configure_retval['exit_code'] == 0, "The configure-module subtask failed!")

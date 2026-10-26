@@ -1,23 +1,55 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Configure kickstart",
-    "$id": "http://nethserver.org/json-schema/task/input/kickstart/configure-module",
-    "description": "Configure kickstart",
+    "title": "Configure PrivateBin",
+    "$id": "http://nethserver.org/json-schema/task/input/privatebin/configure-module",
+    "description": "Configure PrivateBin",
     "examples": [
         {
-            "host": "kickstart.domain.org",
-            "http2https": true,
-            "lets_encrypt": true
+            "host": "privatebin.example.org",
+            "lets_encrypt": true,
+            "name": "PrivateBin",
+            "notice": "",
+            "info": "",
+            "expire_default": "1week",
+            "expire_max": "1year",
+            "discussion": true,
+            "open_discussion": false,
+            "burn_after_reading_selected": false,
+            "qrcode": true,
+            "file_upload": true,
+            "size_limit": 10,
+            "language_selection": true,
+            "language_default": "auto"
         }
     ],
     "type": "object",
     "required": [
-        "host"
+        "host",
+        "lets_encrypt",
+        "name",
+        "notice",
+        "info",
+        "expire_default",
+        "expire_max",
+        "discussion",
+        "open_discussion",
+        "burn_after_reading_selected",
+        "qrcode",
+        "file_upload",
+        "size_limit",
+        "language_selection",
+        "language_default"
     ],
+    "definitions": {
+        "expire": {
+            "type": "string",
+            "enum": ["5min", "10min", "1hour", "1day", "1week", "1month", "1year", "never"]
+        }
+    },
     "properties": {
         "host": {
             "type": "string",
-            "description": "Host name for the application, like 'kickstart.domain.org'",
+            "description": "Host name for the application, like 'privatebin.example.org'",
             "format": "hostname",
             "pattern": "\\."
         },
@@ -26,10 +58,68 @@
             "title": "Let's Encrypt certificate",
             "description": "Request a valid Let's Encrypt certificate."
         },
-        "http2https": {
+        "name": {
+            "type": "string",
+            "description": "Service name shown in the title and the navigation bar",
+            "maxLength": 100
+        },
+        "notice": {
+            "type": "string",
+            "description": "Banner text shown above the editor, plain text",
+            "maxLength": 1000
+        },
+        "info": {
+            "type": "string",
+            "description": "Footer text, HTML allowed",
+            "maxLength": 2000
+        },
+        "expire_default": {
+            "$ref": "#/definitions/expire",
+            "description": "Expiration selected by default"
+        },
+        "expire_max": {
+            "$ref": "#/definitions/expire",
+            "description": "Longest expiration offered to users"
+        },
+        "discussion": {
             "type": "boolean",
-            "title": "HTTP to HTTPS redirection",
-            "description": "Redirect all the HTTP requests to HTTPS"
+            "description": "Allow discussions under documents"
+        },
+        "open_discussion": {
+            "type": "boolean",
+            "description": "Preselect the discussion option"
+        },
+        "burn_after_reading_selected": {
+            "type": "boolean",
+            "description": "Preselect the burn after reading option"
+        },
+        "qrcode": {
+            "type": "boolean",
+            "description": "Offer a QR code of the document link"
+        },
+        "file_upload": {
+            "type": "boolean",
+            "description": "Allow attachments"
+        },
+        "size_limit": {
+            "type": "integer",
+            "description": "Maximum size of an encrypted document, in MiB",
+            "minimum": 1,
+            "maximum": 50
+        },
+        "language_selection": {
+            "type": "boolean",
+            "description": "Show the language menu"
+        },
+        "language_default": {
+            "type": "string",
+            "description": "Default language, 'auto' follows the browser",
+            "pattern": "^(auto|[a-z]{2,3}(-[a-z]{2})?)$"
+        },
+        "logo": {
+            "type": "string",
+            "description": "Navigation bar logo as a base64 PNG or JPEG, empty to restore the original logo. Omit to keep the current one.",
+            "maxLength": 700000
         }
     }
 }

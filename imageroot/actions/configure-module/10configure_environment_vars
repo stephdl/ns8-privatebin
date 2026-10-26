@@ -1,37 +1,60 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (C) 2022 Nethesis S.r.l.
+# Copyright (C) 2026 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
+import os
 import json
 import sys
+import base64
 import agent
 
-# Try to parse the stdin as JSON.
-# If parsing fails, output everything to stderr
+SETTINGS = [
+    "name",
+    "notice",
+    "info",
+    "expire_default",
+    "expire_max",
+    "discussion",
+    "open_discussion",
+    "burn_after_reading_selected",
+    "qrcode",
+    "file_upload",
+    "size_limit",
+    "language_selection",
+    "language_default",
+]
+
 data = json.load(sys.stdin)
-host = data["host"]
-h2hs = data.get("http2https", True)
-agent.set_env("TRAEFIK_HOST", host)
-agent.set_env("TRAEFIK_HTTP2HTTPS", h2hs)
 
-#This is specific to you module, so you need to change it accordingly.
-# we read a json stdin {"vars1":true, "var2":"foo", "vars3": 3} and we writ it to .config/state/environment
-# Upper case to set environment variable and minor case to read from stdin
+agent.set_env("TRAEFIK_HOST", data["host"])
+agent.set_env("TRAEFIK_LETS_ENCRYPT", data["lets_encrypt"])
 
-# this values must exists in the json stdin
-# agent.set_env("MAIL_SERVER", data["mail_server"])
-# agent.set_env("LDAP_DOMAIN", data["ldap_domain"])
+# Free text like HTML breaks the systemd environment file: keep it in JSON
+os.makedirs("privatebin", exist_ok=True)
+with open("privatebin/settings.json.tmp", "w") as fo:
+    json.dump({key: data[key] for key in SETTINGS}, fo, indent=4)
+os.replace("privatebin/settings.json.tmp", "privatebin/settings.json")
 
-# you can add default values for the following variables
-# agent.set_env("MAIL_DOMAIN",data.get("mail_domain",""))
-# agent.set_env("WOWORKERSCOUNT",data.get("workers_count",3))
-# agent.set_env("AUXILIARYACCOUNT",data.get("auxiliary_account",True))
-# agent.set_env("ACTIVESYNC",data.get("activesync",False))
+logo = data.get("logo")
+if logo:
+    image = base64.b64decode(logo)
+    mime = "image/png" if image.startswith(b"\x89PNG") else "image/jpeg"
+    # The template shows img/icon.svg at 38px height: wrap the picture in an SVG
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">'
+        f'<image href="data:{mime};base64,{logo}" width="512" height="512" preserveAspectRatio="xMidYMid meet"/>'
+        '</svg>\n'
+    )
+    with open("privatebin/icon.svg.tmp", "w") as fo:
+        fo.write(svg)
+    os.replace("privatebin/icon.svg.tmp", "privatebin/icon.svg")
+elif logo == "":
+    try:
+        os.remove("privatebin/icon.svg")
+    except FileNotFoundError:
+        pass
 
-
-# Make sure everything is saved inside the environment file
-# just before starting systemd unit
-#agent.dump_env()
+agent.run_helper("runagent", "privatebin-config").check_returncode()
