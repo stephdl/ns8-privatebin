@@ -39,7 +39,7 @@
     "enabled": "Enabled",
     "disabled": "Disabled",
     "configuring": "Configuring",
-    "instance_configuration": "Configure GLPI",
+    "instance_configuration": "Configure PrivateBin",
     "domain_already_used_in_traefik": "Domain already used in traefik",
     "web_access": "Web access",
     "choose_language": "Choose a language",
