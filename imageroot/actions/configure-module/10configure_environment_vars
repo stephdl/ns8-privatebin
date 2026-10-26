@@ -9,6 +9,7 @@ import os
 import json
 import sys
 import base64
+import struct
 import agent
 
 SETTINGS = [
@@ -28,6 +29,21 @@ SETTINGS = [
     "private_creators",
 ]
 
+
+def image_size(image):
+    if image.startswith(b"\x89PNG"):
+        return struct.unpack(">II", image[16:24])
+    # JPEG: walk the segments up to a start of frame marker
+    pos = 2
+    while pos + 9 < len(image):
+        marker, length = image[pos + 1], struct.unpack(">H", image[pos + 2:pos + 4])[0]
+        if marker in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+            height, width = struct.unpack(">HH", image[pos + 5:pos + 9])
+            return width, height
+        pos += 2 + length
+    return 512, 512
+
+
 data = json.load(sys.stdin)
 
 agent.set_env("TRAEFIK_HOST", data["host"])
@@ -43,10 +59,11 @@ logo = data.get("logo")
 if logo:
     image = base64.b64decode(logo)
     mime = "image/png" if image.startswith(b"\x89PNG") else "image/jpeg"
-    # The template shows img/icon.svg at 38px height: wrap the picture in an SVG
+    width, height = image_size(image)
+    # The template shows img/icon.svg at 38px height: wrap the picture in an SVG of the same ratio
     svg = (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">'
-        f'<image href="data:{mime};base64,{logo}" width="512" height="512" preserveAspectRatio="xMidYMid meet"/>'
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}">'
+        f'<image href="data:{mime};base64,{logo}" width="{width}" height="{height}"/>'
         '</svg>\n'
     )
     with open("privatebin/icon.svg.tmp", "w") as fo:
