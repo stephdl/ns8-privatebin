@@ -40,6 +40,23 @@
               :description="$t('settings.public_service_description')"
               :showCloseButton="false"
             />
+            <NsToggle
+              value="privateCreators"
+              :label="$t('settings.private_creators')"
+              v-model="isPrivateCreators"
+              :disabled="stillLoading"
+              class="mg-bottom"
+            >
+              <template #tooltip>
+                {{ $t("settings.private_creators_tooltip") }}
+              </template>
+              <template slot="text-left">{{
+                $t("settings.disabled")
+              }}</template>
+              <template slot="text-right">{{
+                $t("settings.enabled")
+              }}</template>
+            </NsToggle>
             <NsTextInput
               :label="$t('settings.privatebin_fqdn')"
               placeholder="privatebin.example.org"
@@ -164,18 +181,16 @@
 
             <h4 class="mg-bottom-md mg-top">{{ $t("settings.documents") }}</h4>
             <NsComboBox
-              :key="'expireDefault-' + expireComboKey"
               v-model="expireDefault"
               :title="$t('settings.expire_default')"
               :label="$t('settings.choose_expiration')"
-              :options="expireDefaultOptions"
+              :options="expireOptions"
               :invalid-message="$t(error.expire_default)"
               :disabled="stillLoading"
               class="mg-bottom maxwidth"
               ref="expire_default"
             />
             <NsComboBox
-              :key="'expireMax-' + expireComboKey"
               v-model="expireMax"
               :title="$t('settings.expire_max')"
               :label="$t('settings.choose_expiration')"
@@ -293,7 +308,6 @@
 
             <h4 class="mg-bottom-md mg-top">{{ $t("settings.languages") }}</h4>
             <NsComboBox
-              :key="'language-' + languageComboKey"
               v-model="languageDefault"
               :title="$t('settings.language_default')"
               :label="$t('settings.choose_language')"
@@ -464,12 +478,11 @@ export default {
       logoData: "",
       logoPreview: "",
       logoUploaderKey: 0,
-      // empty until the configuration loads: NsComboBox shows the label only when the value changes
+      // empty until the configuration loads: NsComboBox shows the label only when the value changes.
+      // Its options stay fixed: new options are filtered by the old label and the new value is lost.
       expireDefault: "",
       expireMax: "",
-      expireComboKey: 0,
       languageDefault: "",
-      languageComboKey: 0,
       isDiscussionEnabled: true,
       isOpenDiscussion: false,
       isBurnAfterReadingSelected: false,
@@ -477,6 +490,7 @@ export default {
       isFileUploadEnabled: false,
       sizeLimit: "10",
       isLanguageSelectionEnabled: true,
+      isPrivateCreators: true,
       loading: {
         getConfiguration: false,
         configureModule: false,
@@ -523,14 +537,6 @@ export default {
         value,
       }));
     },
-    expireDefaultOptions() {
-      // a default above the maximum is not offered to users
-      const max = EXPIRE_VALUES.indexOf(this.expireMax);
-      if (max < 0) {
-        return this.expireOptions;
-      }
-      return this.expireOptions.slice(0, max + 1);
-    },
     languageOptions() {
       const auto = {
         name: "auto",
@@ -543,19 +549,6 @@ export default {
         value,
       }));
       return [auto, ...languages];
-    },
-  },
-  watch: {
-    expireMax(newMax) {
-      const max = EXPIRE_VALUES.indexOf(newMax);
-      if (
-        this.expireDefault &&
-        max >= 0 &&
-        EXPIRE_VALUES.indexOf(this.expireDefault) > max
-      ) {
-        this.expireDefault = newMax;
-      }
-      this.error.expire_default = "";
     },
   },
   created() {
@@ -697,12 +690,9 @@ export default {
       this.logoData = "";
       this.logoPreview = "";
       this.logoUploaderKey++;
-      // expireMax first: its watcher clamps the default
       this.expireMax = config.expire_max;
       this.expireDefault = config.expire_default;
-      this.expireComboKey++;
       this.languageDefault = config.language_default;
-      this.languageComboKey++;
       this.isDiscussionEnabled = config.discussion;
       this.isOpenDiscussion = config.open_discussion;
       this.isBurnAfterReadingSelected = config.burn_after_reading_selected;
@@ -710,6 +700,7 @@ export default {
       this.isFileUploadEnabled = config.file_upload;
       this.sizeLimit = String(config.size_limit);
       this.isLanguageSelectionEnabled = config.language_selection;
+      this.isPrivateCreators = config.private_creators;
 
       this.loading.getConfiguration = false;
       this.focusElement("host");
@@ -735,6 +726,14 @@ export default {
       }
       if (!this.expireDefault) {
         fail("expire_default", "common.required");
+      }
+      if (
+        this.expireDefault &&
+        this.expireMax &&
+        EXPIRE_VALUES.indexOf(this.expireDefault) >
+          EXPIRE_VALUES.indexOf(this.expireMax)
+      ) {
+        fail("expire_default", "settings.expire_default_above_max");
       }
       if (!this.languageDefault) {
         fail("language_default", "common.required");
@@ -796,6 +795,7 @@ export default {
         size_limit: parseInt(this.sizeLimit, 10),
         language_selection: this.isLanguageSelectionEnabled,
         language_default: this.languageDefault,
+        private_creators: this.isPrivateCreators,
       };
       // without the logo key the backend keeps the current logo
       if (this.logoData) {
