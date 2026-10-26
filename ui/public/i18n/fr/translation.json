@@ -47,7 +47,7 @@
     "no_route_description": "Cette instance n'a pas de route web, par exemple après un clonage. Indiquez un nouveau nom d'hôte et enregistrez pour la publier.",
     "privatebin_fqdn": "Nom d'hôte de PrivateBin",
     "public_service_title": "Service public",
-    "public_service_description": "PrivateBin n'a pas de connexion. Toute personne qui atteint le nom d'hôte peut créer des documents. Les documents sont chiffrés dans le navigateur : le serveur ne voit jamais leur contenu.",
+    "public_service_description": "PrivateBin n'a pas de connexion. Sans limite, toute personne qui atteint le nom d'hôte peut créer des documents. Les documents sont chiffrés dans le navigateur : le serveur ne voit jamais leur contenu.",
     "branding": "Personnalisation",
     "name": "Nom du service",
     "name_helper": "Affiché dans le titre du navigateur et la barre de navigation",
@@ -83,7 +83,7 @@
     "size_limit_info_description": "La limite s'applique au document chiffré, texte et pièces jointes compris. Le chiffrement ajoute environ un tiers à la taille. L'envoi doit se terminer en 60 secondes, les gros documents demandent donc une connexion rapide.",
     "languages": "Langues",
     "language_default": "Langue par défaut",
-    "language_default_helper": "Automatique suit la langue du navigateur",
+    "language_default_helper": "Utilisée quand la langue du navigateur n'a pas de traduction. Avec le menu des langues désactivé, tous les visiteurs ont cette langue.",
     "language_auto": "Automatique",
     "language_selection": "Menu des langues",
     "language_selection_tooltip": "Les utilisateurs peuvent choisir une autre langue dans la barre de navigation",
@@ -94,7 +94,9 @@
     "expire_1week": "1 semaine",
     "expire_1month": "1 mois",
     "expire_1year": "1 an",
-    "expire_never": "Jamais"
+    "expire_never": "Jamais",
+    "private_creators": "Création réservée aux réseaux privés",
+    "private_creators_tooltip": "Seuls les clients des réseaux privés (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7) peuvent créer des documents. Tout le monde peut ouvrir un lien, vous pouvez donc partager un document avec une personne externe. Les bots d'Internet ne peuvent pas remplir le disque."
   },
   "about": {
     "title": "À propos"

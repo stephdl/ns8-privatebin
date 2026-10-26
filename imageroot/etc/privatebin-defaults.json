@@ -11,5 +11,6 @@
     "file_upload": false,
     "size_limit": 10,
     "language_selection": true,
-    "language_default": "auto"
+    "language_default": "auto",
+    "private_creators": true
 }

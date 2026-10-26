@@ -47,7 +47,7 @@
     "no_route_description": "This instance has no web route, for example after a clone. Set a new host name and save to publish it.",
     "privatebin_fqdn": "PrivateBin host name",
     "public_service_title": "Public service",
-    "public_service_description": "PrivateBin has no login. Anyone who can reach the host name can create documents. Documents are encrypted in the browser: the server never sees their content.",
+    "public_service_description": "PrivateBin has no login. Without a limit, anyone who can reach the host name can create documents. Documents are encrypted in the browser: the server never sees their content.",
     "branding": "Branding",
     "name": "Service name",
     "name_helper": "Shown in the browser title and the navigation bar",
@@ -83,7 +83,7 @@
     "size_limit_info_description": "The limit applies to the encrypted document, text and attachments together. Encryption adds about one third to the file size. The upload must finish within 60 seconds, so large documents need a fast connection.",
     "languages": "Languages",
     "language_default": "Default language",
-    "language_default_helper": "Automatic follows the browser language",
+    "language_default_helper": "Used when the browser language has no translation. With the language menu disabled, every visitor gets this language.",
     "language_auto": "Automatic",
     "language_selection": "Language menu",
     "language_selection_tooltip": "Users can choose another language from the navigation bar",
@@ -94,7 +94,9 @@
     "expire_1week": "1 week",
     "expire_1month": "1 month",
     "expire_1year": "1 year",
-    "expire_never": "Never"
+    "expire_never": "Never",
+    "private_creators": "Create documents from private networks only",
+    "private_creators_tooltip": "Only clients from private networks (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7) can create documents. Anyone can still open a link, so you can share a document with someone outside. This keeps bots on the Internet from filling the disk."
   },
   "about": {
     "title": "About"

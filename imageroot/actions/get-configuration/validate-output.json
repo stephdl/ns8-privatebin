@@ -21,7 +21,8 @@
             "file_upload": false,
             "size_limit": 10,
             "language_selection": true,
-            "language_default": "auto"
+            "language_default": "auto",
+            "private_creators": true
         }
     ],
     "type": "object",
@@ -42,7 +43,8 @@
         "file_upload",
         "size_limit",
         "language_selection",
-        "language_default"
+        "language_default",
+        "private_creators"
     ],
     "properties": {
         "host": {
@@ -98,6 +100,9 @@
         },
         "language_default": {
             "type": "string"
+        },
+        "private_creators": {
+            "type": "boolean"
         }
     }
 }

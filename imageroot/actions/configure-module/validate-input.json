@@ -19,7 +19,8 @@
             "file_upload": true,
             "size_limit": 10,
             "language_selection": true,
-            "language_default": "auto"
+            "language_default": "auto",
+            "private_creators": true
         }
     ],
     "type": "object",
@@ -38,12 +39,22 @@
         "file_upload",
         "size_limit",
         "language_selection",
-        "language_default"
+        "language_default",
+        "private_creators"
     ],
     "definitions": {
         "expire": {
             "type": "string",
-            "enum": ["5min", "10min", "1hour", "1day", "1week", "1month", "1year", "never"]
+            "enum": [
+                "5min",
+                "10min",
+                "1hour",
+                "1day",
+                "1week",
+                "1month",
+                "1year",
+                "never"
+            ]
         }
     },
     "properties": {
@@ -120,6 +131,10 @@
             "type": "string",
             "description": "Navigation bar logo as a base64 PNG or JPEG, empty to restore the original logo. Omit to keep the current one.",
             "maxLength": 700000
+        },
+        "private_creators": {
+            "type": "boolean",
+            "description": "Only clients from private networks can create documents, anyone can read a link"
         }
     }
 }

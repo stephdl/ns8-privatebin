@@ -25,6 +25,7 @@ SETTINGS = [
     "size_limit",
     "language_selection",
     "language_default",
+    "private_creators",
 ]
 
 data = json.load(sys.stdin)
