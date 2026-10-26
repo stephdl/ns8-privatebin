@@ -494,7 +494,7 @@ export default {
       expireDefault: "",
       expireMax: "",
       languageDefault: "",
-      isDiscussionEnabled: true,
+      isDiscussionEnabled: false,
       isOpenDiscussion: false,
       isBurnAfterReadingSelected: false,
       isQrcodeEnabled: true,

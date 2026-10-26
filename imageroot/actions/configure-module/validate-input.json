@@ -12,7 +12,7 @@
             "info": "",
             "expire_default": "1week",
             "expire_max": "1year",
-            "discussion": true,
+            "discussion": false,
             "open_discussion": false,
             "burn_after_reading_selected": false,
             "qrcode": true,
