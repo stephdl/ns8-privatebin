@@ -80,7 +80,7 @@
     "size_limit": "Taille maximale d'un document",
     "mib": "Mio",
     "size_limit_info_title": "Durée d'envoi",
-    "size_limit_info_description": "La limite s'applique au document chiffré, texte et pièces jointes compris. Le chiffrement ajoute environ un tiers à la taille. L'envoi doit se terminer en 60 secondes, les gros documents demandent donc une connexion rapide.",
+    "size_limit_info_description": "De 1 à 50 Mio. La limite s'applique au document chiffré, texte et pièces jointes compris. Le chiffrement ajoute environ un tiers à la taille. L'envoi doit se terminer en 60 secondes, les gros documents demandent donc une connexion rapide.",
     "languages": "Langues",
     "language_default": "Langue par défaut",
     "language_default_helper": "Utilisée quand la langue du navigateur n'a pas de traduction. Avec le menu des langues désactivé, tous les visiteurs ont cette langue.",
@@ -96,7 +96,8 @@
     "expire_1year": "1 an",
     "expire_never": "Jamais",
     "private_creators": "Création réservée aux réseaux privés",
-    "private_creators_tooltip": "Seuls les clients des réseaux privés (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7) peuvent créer des documents. Tout le monde peut ouvrir un lien, vous pouvez donc partager un document avec une personne externe. Les bots d'Internet ne peuvent pas remplir le disque."
+    "private_creators_tooltip": "Seuls les clients des réseaux privés (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7) peuvent créer des documents. Tout le monde peut ouvrir un lien, vous pouvez donc partager un document avec une personne externe. Les bots d'Internet ne peuvent pas remplir le disque.",
+    "advanced": "Avancé"
   },
   "about": {
     "title": "À propos"

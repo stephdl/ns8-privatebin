@@ -109,235 +109,245 @@
               :showCloseButton="false"
             />
 
-            <h4 class="mg-bottom-md mg-top">{{ $t("settings.branding") }}</h4>
-            <NsTextInput
-              :label="$t('settings.name')"
-              placeholder="PrivateBin"
-              v-model.trim="name"
-              :helper-text="$t('settings.name_helper')"
-              :invalid-message="$t(error.name)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="name"
-            />
-            <cv-text-area
-              :label="$t('settings.notice')"
-              v-model.trim="notice"
-              :helper-text="$t('settings.notice_helper')"
-              :invalid-message="$t(error.notice)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="notice"
-            />
-            <cv-text-area
-              :label="$t('settings.info')"
-              v-model.trim="info"
-              :helper-text="$t('settings.info_helper')"
-              :invalid-message="$t(error.info)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="info"
-            />
-            <div class="mg-bottom maxwidth">
-              <div class="bx--label">{{ $t("settings.logo") }}</div>
-              <div class="logo-row mg-bottom-sm">
-                <img
-                  v-if="logoPreview"
-                  :src="logoPreview"
-                  class="logo-preview"
-                  alt=""
-                />
-                <span v-else class="logo-status">{{
-                  isLogoSet && !isLogoReset
-                    ? $t("settings.logo_custom")
-                    : $t("settings.logo_original")
-                }}</span>
-                <NsButton
-                  v-if="(isLogoSet && !isLogoReset) || logoData"
-                  kind="ghost"
-                  size="small"
-                  :icon="Reset20"
-                  :disabled="stillLoading"
-                  @click="resetLogo"
-                  >{{ $t("settings.logo_reset") }}</NsButton
-                >
-              </div>
-              <cv-file-uploader
-                :key="logoUploaderKey"
-                kind="button"
-                :buttonLabel="$t('settings.logo_choose')"
-                :helperText="$t('settings.logo_helper')"
-                accept=".png,.jpg,.jpeg,image/png,image/jpeg"
-                :multiple="false"
-                :removable="false"
-                :disabled="stillLoading"
-                @change="onLogoChange"
-                ref="logo"
-              />
-              <div v-if="error.logo" class="logo-error">
-                {{ $t(error.logo) }}
-              </div>
-            </div>
+            <cv-accordion ref="accordion" class="maxwidth mg-bottom mg-top">
+              <cv-accordion-item :open="toggleAccordion[0]">
+                <template slot="title">{{ $t("settings.advanced") }}</template>
+                <template slot="content">
+                  <h4 class="mg-bottom-md">{{ $t("settings.branding") }}</h4>
+                  <NsTextInput
+                    :label="$t('settings.name')"
+                    placeholder="PrivateBin"
+                    v-model.trim="name"
+                    :helper-text="$t('settings.name_helper')"
+                    :invalid-message="$t(error.name)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="name"
+                  />
+                  <cv-text-area
+                    :label="$t('settings.notice')"
+                    v-model.trim="notice"
+                    :helper-text="$t('settings.notice_helper')"
+                    :invalid-message="$t(error.notice)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="notice"
+                  />
+                  <cv-text-area
+                    :label="$t('settings.info')"
+                    v-model.trim="info"
+                    :helper-text="$t('settings.info_helper')"
+                    :invalid-message="$t(error.info)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="info"
+                  />
+                  <div class="mg-bottom maxwidth">
+                    <div class="bx--label">{{ $t("settings.logo") }}</div>
+                    <div class="logo-row mg-bottom-sm">
+                      <img
+                        v-if="logoPreview"
+                        :src="logoPreview"
+                        class="logo-preview"
+                        alt=""
+                      />
+                      <span v-else class="logo-status">{{
+                        isLogoSet && !isLogoReset
+                          ? $t("settings.logo_custom")
+                          : $t("settings.logo_original")
+                      }}</span>
+                      <NsButton
+                        v-if="(isLogoSet && !isLogoReset) || logoData"
+                        kind="tertiary"
+                        size="small"
+                        :icon="Reset20"
+                        :disabled="stillLoading"
+                        @click="resetLogo"
+                        >{{ $t("settings.logo_reset") }}</NsButton
+                      >
+                    </div>
+                    <cv-file-uploader
+                      :key="logoUploaderKey"
+                      kind="button"
+                      :buttonLabel="$t('settings.logo_choose')"
+                      :helperText="$t('settings.logo_helper')"
+                      accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+                      :multiple="false"
+                      :removable="false"
+                      :disabled="stillLoading"
+                      @change="onLogoChange"
+                      ref="logo"
+                    />
+                    <div v-if="error.logo" class="logo-error">
+                      {{ $t(error.logo) }}
+                    </div>
+                  </div>
 
-            <h4 class="mg-bottom-md mg-top">{{ $t("settings.documents") }}</h4>
-            <NsComboBox
-              v-model="expireDefault"
-              :title="$t('settings.expire_default')"
-              :label="$t('settings.choose_expiration')"
-              :options="expireOptions"
-              :invalid-message="$t(error.expire_default)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="expire_default"
-            />
-            <NsComboBox
-              v-model="expireMax"
-              :title="$t('settings.expire_max')"
-              :label="$t('settings.choose_expiration')"
-              :options="expireOptions"
-              :helper-text="$t('settings.expire_max_helper')"
-              :invalid-message="$t(error.expire_max)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="expire_max"
-            />
-            <NsToggle
-              value="burnAfterReading"
-              :label="$t('settings.burn_after_reading_selected')"
-              v-model="isBurnAfterReadingSelected"
-              :disabled="stillLoading"
-              class="mg-bottom"
-            >
-              <template #tooltip>
-                {{ $t("settings.burn_after_reading_selected_tooltip") }}
-              </template>
-              <template slot="text-left">{{
-                $t("settings.disabled")
-              }}</template>
-              <template slot="text-right">{{
-                $t("settings.enabled")
-              }}</template>
-            </NsToggle>
-            <NsToggle
-              value="discussion"
-              :label="$t('settings.discussion')"
-              v-model="isDiscussionEnabled"
-              :disabled="stillLoading"
-              class="mg-bottom"
-            >
-              <template slot="text-left">{{
-                $t("settings.disabled")
-              }}</template>
-              <template slot="text-right">{{
-                $t("settings.enabled")
-              }}</template>
-            </NsToggle>
-            <NsToggle
-              v-if="isDiscussionEnabled"
-              value="openDiscussion"
-              :label="$t('settings.open_discussion')"
-              v-model="isOpenDiscussion"
-              :disabled="stillLoading"
-              class="mg-bottom"
-            >
-              <template slot="text-left">{{
-                $t("settings.disabled")
-              }}</template>
-              <template slot="text-right">{{
-                $t("settings.enabled")
-              }}</template>
-            </NsToggle>
-            <NsToggle
-              value="qrcode"
-              :label="$t('settings.qrcode')"
-              v-model="isQrcodeEnabled"
-              :disabled="stillLoading"
-              class="mg-bottom"
-            >
-              <template slot="text-left">{{
-                $t("settings.disabled")
-              }}</template>
-              <template slot="text-right">{{
-                $t("settings.enabled")
-              }}</template>
-            </NsToggle>
+                  <h4 class="mg-bottom-md mg-top">
+                    {{ $t("settings.documents") }}
+                  </h4>
+                  <NsComboBox
+                    v-model="expireDefault"
+                    :title="$t('settings.expire_default')"
+                    :label="$t('settings.choose_expiration')"
+                    :options="expireOptions"
+                    :invalid-message="$t(error.expire_default)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="expire_default"
+                  />
+                  <NsComboBox
+                    v-model="expireMax"
+                    :title="$t('settings.expire_max')"
+                    :label="$t('settings.choose_expiration')"
+                    :options="expireOptions"
+                    :helper-text="$t('settings.expire_max_helper')"
+                    :invalid-message="$t(error.expire_max)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="expire_max"
+                  />
+                  <NsToggle
+                    value="burnAfterReading"
+                    :label="$t('settings.burn_after_reading_selected')"
+                    v-model="isBurnAfterReadingSelected"
+                    :disabled="stillLoading"
+                    class="mg-bottom"
+                  >
+                    <template #tooltip>
+                      {{ $t("settings.burn_after_reading_selected_tooltip") }}
+                    </template>
+                    <template slot="text-left">{{
+                      $t("settings.disabled")
+                    }}</template>
+                    <template slot="text-right">{{
+                      $t("settings.enabled")
+                    }}</template>
+                  </NsToggle>
+                  <NsToggle
+                    value="discussion"
+                    :label="$t('settings.discussion')"
+                    v-model="isDiscussionEnabled"
+                    :disabled="stillLoading"
+                    class="mg-bottom"
+                  >
+                    <template slot="text-left">{{
+                      $t("settings.disabled")
+                    }}</template>
+                    <template slot="text-right">{{
+                      $t("settings.enabled")
+                    }}</template>
+                  </NsToggle>
+                  <NsToggle
+                    v-if="isDiscussionEnabled"
+                    value="openDiscussion"
+                    :label="$t('settings.open_discussion')"
+                    v-model="isOpenDiscussion"
+                    :disabled="stillLoading"
+                    class="mg-bottom"
+                  >
+                    <template slot="text-left">{{
+                      $t("settings.disabled")
+                    }}</template>
+                    <template slot="text-right">{{
+                      $t("settings.enabled")
+                    }}</template>
+                  </NsToggle>
+                  <NsToggle
+                    value="qrcode"
+                    :label="$t('settings.qrcode')"
+                    v-model="isQrcodeEnabled"
+                    :disabled="stillLoading"
+                    class="mg-bottom"
+                  >
+                    <template slot="text-left">{{
+                      $t("settings.disabled")
+                    }}</template>
+                    <template slot="text-right">{{
+                      $t("settings.enabled")
+                    }}</template>
+                  </NsToggle>
 
-            <h4 class="mg-bottom-md mg-top">
-              {{ $t("settings.attachments") }}
-            </h4>
-            <NsToggle
-              value="fileUpload"
-              :label="$t('settings.file_upload')"
-              v-model="isFileUploadEnabled"
-              :disabled="stillLoading"
-              class="mg-bottom"
-            >
-              <template #tooltip>
-                {{ $t("settings.file_upload_tooltip") }}
-              </template>
-              <template slot="text-left">{{
-                $t("settings.disabled")
-              }}</template>
-              <template slot="text-right">{{
-                $t("settings.enabled")
-              }}</template>
-            </NsToggle>
-            <template v-if="isFileUploadEnabled">
-              <NsSlider
-                v-model="sizeLimit"
-                :label="$t('settings.size_limit')"
-                min="1"
-                max="50"
-                step="1"
-                stepMultiplier="5"
-                minLabel="1"
-                maxLabel="50"
-                :unitLabel="$t('settings.mib')"
-                :invalidMessage="$t(error.size_limit)"
-                :disabled="stillLoading"
-                class="mg-bottom maxwidth"
-                ref="size_limit"
-              />
-              <NsInlineNotification
-                kind="info"
-                :title="$t('settings.size_limit_info_title')"
-                :description="$t('settings.size_limit_info_description')"
-                :showCloseButton="false"
-              />
-            </template>
+                  <h4 class="mg-bottom-md mg-top">
+                    {{ $t("settings.attachments") }}
+                  </h4>
+                  <NsToggle
+                    value="fileUpload"
+                    :label="$t('settings.file_upload')"
+                    v-model="isFileUploadEnabled"
+                    :disabled="stillLoading"
+                    class="mg-bottom"
+                  >
+                    <template #tooltip>
+                      {{ $t("settings.file_upload_tooltip") }}
+                    </template>
+                    <template slot="text-left">{{
+                      $t("settings.disabled")
+                    }}</template>
+                    <template slot="text-right">{{
+                      $t("settings.enabled")
+                    }}</template>
+                  </NsToggle>
+                  <template v-if="isFileUploadEnabled">
+                    <NsSlider
+                      v-model="sizeLimit"
+                      :label="$t('settings.size_limit')"
+                      min="1"
+                      max="50"
+                      step="1"
+                      stepMultiplier="5"
+                      minLabel=""
+                      maxLabel=""
+                      :unitLabel="$t('settings.mib')"
+                      :invalidMessage="$t(error.size_limit)"
+                      :disabled="stillLoading"
+                      class="mg-bottom maxwidth"
+                      ref="size_limit"
+                    />
+                    <NsInlineNotification
+                      kind="info"
+                      :title="$t('settings.size_limit_info_title')"
+                      :description="$t('settings.size_limit_info_description')"
+                      :showCloseButton="false"
+                    />
+                  </template>
 
-            <h4 class="mg-bottom-md mg-top">{{ $t("settings.languages") }}</h4>
-            <NsComboBox
-              v-model="languageDefault"
-              :title="$t('settings.language_default')"
-              :label="$t('settings.choose_language')"
-              :options="languageOptions"
-              :autoFilter="true"
-              :autoHighlight="true"
-              :helper-text="$t('settings.language_default_helper')"
-              :invalid-message="$t(error.language_default)"
-              :disabled="stillLoading"
-              class="mg-bottom maxwidth"
-              ref="language_default"
-            />
-            <NsToggle
-              value="languageSelection"
-              :label="$t('settings.language_selection')"
-              v-model="isLanguageSelectionEnabled"
-              :disabled="stillLoading"
-              class="mg-bottom"
-            >
-              <template #tooltip>
-                {{ $t("settings.language_selection_tooltip") }}
-              </template>
-              <template slot="text-left">{{
-                $t("settings.disabled")
-              }}</template>
-              <template slot="text-right">{{
-                $t("settings.enabled")
-              }}</template>
-            </NsToggle>
-
+                  <h4 class="mg-bottom-md mg-top">
+                    {{ $t("settings.languages") }}
+                  </h4>
+                  <NsComboBox
+                    v-model="languageDefault"
+                    :title="$t('settings.language_default')"
+                    :label="$t('settings.choose_language')"
+                    :options="languageOptions"
+                    :autoFilter="true"
+                    :autoHighlight="true"
+                    :helper-text="$t('settings.language_default_helper')"
+                    :invalid-message="$t(error.language_default)"
+                    :disabled="stillLoading"
+                    class="mg-bottom maxwidth"
+                    ref="language_default"
+                  />
+                  <NsToggle
+                    value="languageSelection"
+                    :label="$t('settings.language_selection')"
+                    v-model="isLanguageSelectionEnabled"
+                    :disabled="stillLoading"
+                    class="mg-bottom"
+                  >
+                    <template #tooltip>
+                      {{ $t("settings.language_selection_tooltip") }}
+                    </template>
+                    <template slot="text-left">{{
+                      $t("settings.disabled")
+                    }}</template>
+                    <template slot="text-right">{{
+                      $t("settings.enabled")
+                    }}</template>
+                  </NsToggle>
+                </template>
+              </cv-accordion-item>
+            </cv-accordion>
             <NsInlineNotification
               v-if="error.configureModule"
               kind="error"
@@ -464,6 +474,7 @@ export default {
       Reset20,
       status: {},
       validationErrorDetails: [],
+      toggleAccordion: [false],
       urlCheckInterval: null,
       host: "",
       configuredHost: "",
@@ -568,6 +579,12 @@ export default {
   methods: {
     goToCertificates() {
       this.core.$router.push("/settings/tls-certificates");
+    },
+    openAdvancedFor(field) {
+      // a hidden field cannot show its error nor take the focus
+      if (!["host", "lets_encrypt"].includes(field)) {
+        this.$set(this.toggleAccordion, 0, true);
+      }
     },
     onLogoChange(files) {
       this.error.logo = "";
@@ -712,6 +729,7 @@ export default {
 
       const fail = (field, message) => {
         this.error[field] = message;
+        this.openAdvancedFor(field);
         if (isValidationOk) {
           this.focusElement(field);
         }
@@ -751,6 +769,7 @@ export default {
             .filter((detail) => detail.trim() !== "");
         } else {
           this.error[param] = "settings." + validationError.error;
+          this.openAdvancedFor(param);
           if (!focusAlreadySet && param !== "logo") {
             this.focusElement(param);
             focusAlreadySet = true;

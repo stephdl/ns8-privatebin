@@ -80,7 +80,7 @@
     "size_limit": "Maximum document size",
     "mib": "MiB",
     "size_limit_info_title": "Upload time",
-    "size_limit_info_description": "The limit applies to the encrypted document, text and attachments together. Encryption adds about one third to the file size. The upload must finish within 60 seconds, so large documents need a fast connection.",
+    "size_limit_info_description": "From 1 to 50 MiB. The limit applies to the encrypted document, text and attachments together. Encryption adds about one third to the file size. The upload must finish within 60 seconds, so large documents need a fast connection.",
     "languages": "Languages",
     "language_default": "Default language",
     "language_default_helper": "Used when the browser language has no translation. With the language menu disabled, every visitor gets this language.",
@@ -96,7 +96,8 @@
     "expire_1year": "1 year",
     "expire_never": "Never",
     "private_creators": "Create documents from private networks only",
-    "private_creators_tooltip": "Only clients from private networks (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7) can create documents. Anyone can still open a link, so you can share a document with someone outside. This keeps bots on the Internet from filling the disk."
+    "private_creators_tooltip": "Only clients from private networks (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7) can create documents. Anyone can still open a link, so you can share a document with someone outside. This keeps bots on the Internet from filling the disk.",
+    "advanced": "Advanced"
   },
   "about": {
     "title": "About"
