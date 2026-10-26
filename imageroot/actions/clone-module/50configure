@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import os
+import sys
+import json
+import agent
+
+request = json.load(sys.stdin)
+
+# A plain clone runs next to its source: the admin must give it a new host name
+if not request.get("replace"):
+    # The copied logo.env still points to the source module state directory
+    agent.run_helper("runagent", "privatebin-config").check_returncode()
+    print(agent.SD_WARNING + "Cloned instance has no web route, set a new host name in Settings", file=sys.stderr)
+    sys.exit(0)
+
+with open(os.environ["AGENT_INSTALL_DIR"] + "/etc/privatebin-defaults.json") as fi:
+    data = json.load(fi)
+try:
+    with open("privatebin/settings.json") as fi:
+        data.update(json.load(fi))
+except FileNotFoundError:
+    pass
+
+data["host"] = os.environ["TRAEFIK_HOST"]
+data["lets_encrypt"] = os.environ.get("TRAEFIK_LETS_ENCRYPT") == "True"
+
+configure_retval = agent.tasks.run(agent_id=os.environ['AGENT_ID'], action='configure-module', data=data)
+agent.assert_exp(configure_retval['exit_code'] == 0, "The configure-module subtask failed!")

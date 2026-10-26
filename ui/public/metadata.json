@@ -1,19 +1,30 @@
 {
-  "name": "kickstart",
+  "name": "PrivateBin",
+  "upstream_name": "PrivateBin version set automatically",
   "description": {
-    "en": "My kickstart module"
+    "en": "Share text and files with end-to-end encryption: the server never sees the content.",
+    "fr": "Partage de textes et de fichiers chiffrés de bout en bout : le serveur ne voit jamais le contenu.",
+    "it": "Condivisione di testi e file con cifratura end-to-end: il server non vede mai il contenuto.",
+    "de": "Texte und Dateien mit Ende-zu-Ende-Verschlüsselung teilen: der Server sieht den Inhalt nie.",
+    "es": "Comparte textos y archivos con cifrado de extremo a extremo: el servidor nunca ve el contenido.",
+    "pt": "Partilha de textos e ficheiros com cifra ponta a ponta: o servidor nunca vê o conteúdo.",
+    "pt_BR": "Compartilhe textos e arquivos com criptografia de ponta a ponta: o servidor nunca vê o conteúdo.",
+    "eu": "Testuak eta fitxategiak muturretik muturrerako zifratzearekin partekatu: zerbitzariak ez du inoiz edukia ikusten."
   },
-  "categories": [],
+  "categories": [
+    "collaboration",
+    "security"
+  ],
   "authors": [
     {
-      "name": "Name Surname",
-      "email": "author@yourmail.org"
+      "name": "Stephane de Labrusse",
+      "email": "stephdl@de-labrusse.fr"
     }
   ],
   "docs": {
-    "documentation_url": "https://docs.kickstart.com/",
-    "bug_url": "https://github.com/NethServer/dev",
-    "code_url": "https://github.com/author/ns8-kickstart"
+    "documentation_url": "https://github.com/stephdl/ns8-privatebin#readme",
+    "bug_url": "https://github.com/stephdl/dev/issues",
+    "code_url": "https://github.com/stephdl/ns8-privatebin"
   },
-  "source": "ghcr.io/nethserver/kickstart"
+  "source": "ghcr.io/stephdl/privatebin"
 }

@@ -1,36 +1,113 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Get kickstart settings",
-    "$id": "http://nethserver.org/json-schema/task/input/kickstart/get-configuration",
-    "description": "Get kickstart settings",
+    "title": "Get PrivateBin settings",
+    "$id": "http://nethserver.org/json-schema/task/output/privatebin/get-configuration",
+    "description": "Get PrivateBin settings",
     "examples": [
         {
-            "host": "kickstart.domain.org",
-            "http2https": true,
-            "lets_encrypt": true
+            "host": "privatebin.example.org",
+            "lets_encrypt": true,
+            "route_configured": true,
+            "logo_set": false,
+            "name": "PrivateBin",
+            "notice": "",
+            "info": "",
+            "expire_default": "1week",
+            "expire_max": "1year",
+            "discussion": false,
+            "open_discussion": false,
+            "burn_after_reading_selected": false,
+            "qrcode": true,
+            "file_upload": false,
+            "size_limit": 10,
+            "language_selection": true,
+            "language_default": "auto",
+            "private_creators": true,
+            "rate_limit": 30
         }
     ],
     "type": "object",
     "required": [
         "host",
-        "http2https",
-        "lets_encrypt"
+        "lets_encrypt",
+        "route_configured",
+        "logo_set",
+        "name",
+        "notice",
+        "info",
+        "expire_default",
+        "expire_max",
+        "discussion",
+        "open_discussion",
+        "burn_after_reading_selected",
+        "qrcode",
+        "file_upload",
+        "size_limit",
+        "language_selection",
+        "language_default",
+        "private_creators",
+        "rate_limit"
     ],
     "properties": {
         "host": {
             "type": "string",
-            "description": "Host name for the application, like 'kickstart.domain.org'",
-            "format": "idn-hostname"
+            "description": "Host name for the application, empty before the first configuration"
         },
         "lets_encrypt": {
-            "type": "boolean",
-            "title": "Let's Encrypt certificate",
-            "description": "Request a valid Let's Encrypt certificate."
+            "type": "boolean"
         },
-        "http2https": {
+        "route_configured": {
             "type": "boolean",
-            "title": "HTTP to HTTPS redirection",
-            "description": "Redirect all the HTTP requests to HTTPS"
+            "description": "False on a clone until a new host name is saved"
+        },
+        "logo_set": {
+            "type": "boolean",
+            "description": "A custom navigation bar logo replaces the original one"
+        },
+        "name": {
+            "type": "string"
+        },
+        "notice": {
+            "type": "string"
+        },
+        "info": {
+            "type": "string"
+        },
+        "expire_default": {
+            "type": "string"
+        },
+        "expire_max": {
+            "type": "string"
+        },
+        "discussion": {
+            "type": "boolean"
+        },
+        "open_discussion": {
+            "type": "boolean"
+        },
+        "burn_after_reading_selected": {
+            "type": "boolean"
+        },
+        "qrcode": {
+            "type": "boolean"
+        },
+        "file_upload": {
+            "type": "boolean"
+        },
+        "size_limit": {
+            "type": "integer"
+        },
+        "language_selection": {
+            "type": "boolean"
+        },
+        "language_default": {
+            "type": "string"
+        },
+        "private_creators": {
+            "type": "boolean"
+        },
+        "rate_limit": {
+            "type": "integer"
         }
     }
 }

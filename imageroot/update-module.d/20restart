@@ -1,15 +1,19 @@
 #!/bin/bash
 
 #
-# Copyright (C) 2023 Nethesis S.r.l.
+# Copyright (C) 2026 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-# If the control reaches this step, the service can be enabled and started
-
 set -e
 
-# Redirect any output to the journal (stderr)
 exec 1>&2
 
-systemctl --user try-restart kickstart.service
+# Not configured yet: configure-module writes the files and starts PrivateBin
+if [[ -z "${TRAEFIK_HOST}" ]]; then
+    exit 0
+fi
+
+# A new module version may write new settings
+runagent privatebin-config
+systemctl --user try-restart privatebin.service

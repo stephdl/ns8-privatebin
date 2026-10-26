@@ -1,0 +1,15 @@
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+[Unit]
+Description=Delete expired PrivateBin documents
+After=privatebin-app.service
+
+[Service]
+Type=oneshot
+# Skip the run quietly while PrivateBin is stopped or restarting
+ExecCondition=/usr/bin/systemctl --user is-active -q privatebin-app.service
+SyslogIdentifier=%N
+ExecStart=/usr/bin/podman exec privatebin-app administration --purge

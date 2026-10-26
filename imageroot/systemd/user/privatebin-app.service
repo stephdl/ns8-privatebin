@@ -1,0 +1,40 @@
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+[Unit]
+Description=Podman privatebin-app.service
+BindsTo=privatebin.service
+After=privatebin.service
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%S/state/environment
+# Sets LOGO_VOLUME when a custom logo exists. Unbraced $LOGO_VOLUME below
+# expands to no argument at all when it is empty.
+EnvironmentFile=-%S/state/privatebin/logo.env
+Restart=always
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/privatebin-app.pid %t/privatebin-app.ctr-id
+ExecStart=/usr/bin/podman run --conmon-pidfile %t/privatebin-app.pid \
+    --cidfile %t/privatebin-app.ctr-id --cgroups=no-conmon \
+    --pod-id-file %t/privatebin.pod-id --replace -d --name privatebin-app \
+    --read-only \
+    --tmpfs /run \
+    --tmpfs /tmp \
+    --tmpfs /var/lib/nginx/tmp \
+    --volume privatebin-data:/srv/data:Z \
+    --volume %S/state/privatebin/conf.php:/srv/cfg/conf.php:ro,z \
+    --volume %S/state/privatebin/php.ini:/etc/php/conf.d/99-ns8.ini:ro,z \
+    --volume %S/state/privatebin/nginx.conf:/etc/nginx/server.d/90-ns8.conf:ro,z \
+    $LOGO_VOLUME \
+    ${NGINX_FPM_ALPINE_IMAGE}
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/privatebin-app.ctr-id -t 10
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/privatebin-app.ctr-id
+SyslogIdentifier=%u
+PIDFile=%t/privatebin-app.pid
+Type=forking
+
+[Install]
+WantedBy=default.target

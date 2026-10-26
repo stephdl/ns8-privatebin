@@ -71,6 +71,9 @@
                 ></cv-skeleton-text>
                 <span v-else>
                   {{ version }}
+                  <template v-if="app.upstream_name">
+                    ({{ app.upstream_name }})</template
+                  >
                 </span>
               </span>
             </div>
