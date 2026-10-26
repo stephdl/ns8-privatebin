@@ -22,6 +22,12 @@ try:
 except FileNotFoundError:
     print(agent.SD_WARNING + "No PrivateBin settings in the backup, using the defaults", file=sys.stderr)
 
+# Like a clone: the original instance may still hold the host on this cluster
+if agent.http_route_in_use(domain=renv["TRAEFIK_HOST"]):
+    agent.run_helper("runagent", "privatebin-config").check_returncode()
+    print(agent.SD_WARNING + f"Host {renv['TRAEFIK_HOST']} is already used, set a new host name in Settings", file=sys.stderr)
+    sys.exit(0)
+
 data["host"] = renv["TRAEFIK_HOST"]
 data["lets_encrypt"] = renv.get("TRAEFIK_LETS_ENCRYPT") == "True"
 
