@@ -5,6 +5,8 @@ Resource    api.resource
 *** Variables ***
 # install tests the image under test, update starts from the stephdl forge release
 ${SCENARIO}    install
+${CLUSTER_USER}     admin
+${CLUSTER_PASSWORD}    Nethesis,1234
 # Any resolvable-looking name: the schema demands a dot, nothing resolves it.
 ${TEST_HOST}    privatebin.ns8-ci.test
 ${BASE_CONFIG}    "host":"${TEST_HOST}","lets_encrypt":false,"name":"CI \\"Paste\\" $HOME","notice":"Test banner","info":"","expire_default":"1day","expire_max":"1month","discussion":true,"open_discussion":false,"burn_after_reading_selected":false,"qrcode":true,"file_upload":true,"size_limit":20,"language_selection":true,"language_default":"auto","private_creators":false,"rate_limit":45
@@ -14,6 +16,14 @@ ${CIPHERTEXT}    Q2WeGrkRJu9IIss/xjqKWBo5RXcHxf2LS1yxUGvYkChAtiW5Q7En8eh+h5jGqC0
 ${LOGO}    iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==
 
 *** Keywords ***
+Login to cluster-admin
+    New Page    https://${NODE_ADDR}/cluster-admin/
+    Fill Text    text="Username"    ${CLUSTER_USER}
+    Click    button >> text="Continue"
+    Fill Text    text="Password"    ${CLUSTER_PASSWORD}
+    Click    button >> text="Log in"
+    Wait For Elements State    css=#main-content    visible    timeout=10s
+
 Get page
     [Arguments]    ${path}
     ${page} =    Execute Command
@@ -177,6 +187,30 @@ Check if an update keeps the configuration and the documents
     ${svg} =    Get page    /img/icon.svg
     Should Contain    ${svg}    data:image/png;base64,${LOGO}
     Read the stored document
+
+Take screenshots of the module pages
+    [Documentation]    Capture what cluster-admin shows, for the software center
+    ...                entry. Tagged ui: the shared runner skips it unless
+    ...                RUN_UI_TESTS is true, since it needs a browser.
+    [Tags]    ui
+    Import Library    Browser
+    New Browser    chromium    headless=True
+    New Context    ignoreHTTPSErrors=True    viewport={'width': 1280, 'height': 900}
+    Login to cluster-admin
+    Go To    https://${NODE_ADDR}/cluster-admin/#/apps/${module_id}
+    Wait For Elements State    iframe >>> h2 >> text="Status"    visible    timeout=10s
+    # The page fills itself from several tasks: let them land
+    Sleep    5s
+    Take Screenshot    filename=${OUTPUT DIR}/browser/screenshot/1._Status.png
+    Go To    https://${NODE_ADDR}/cluster-admin/#/apps/${module_id}?page=settings
+    Wait For Elements State    iframe >>> h2 >> text="Settings"    visible    timeout=10s
+    Sleep    5s
+    Take Screenshot    filename=${OUTPUT DIR}/browser/screenshot/2._Settings.png
+    Go To    https://${NODE_ADDR}/cluster-admin/#/apps/${module_id}?page=about
+    Wait For Elements State    iframe >>> h2 >> text="About"    visible    timeout=10s
+    Sleep    5s
+    Take Screenshot    filename=${OUTPUT DIR}/browser/screenshot/3._About.png
+    Close Browser
 
 Check if the purge timer is active
     ${output}  ${rc} =    Execute Command    runagent -m ${module_id} systemctl --user is-active privatebin-purge.timer
