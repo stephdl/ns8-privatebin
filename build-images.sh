@@ -17,7 +17,7 @@ reponame="privatebin"
 # Node.js 25+ no longer ships Corepack, install it from npm
 # renovate: datasource=npm packageName=corepack
 corepack_version=0.36.0
-privatebin_image="docker.io/privatebin/nginx-fpm-alpine:2.1.0"
+privatebin_image="docker.io/privatebin/nginx-fpm-alpine:2.1.1"
 
 # Show the PrivateBin version in the About page, restore the metadata on exit
 metadata_file="ui/public/metadata.json"
