@@ -147,6 +147,14 @@ Check if the delay between documents is applied
     ${other} =    Post a document from    203.0.113.8
     Should Contain    ${other}    Invalid data
 
+Check if an old zero delay becomes 30 seconds
+    Run task    module/${module_id}/configure-module    {${BASE_CONFIG.replace('"rate_limit":45', '"rate_limit":0')}}
+    ${conf} =    Execute Command    runagent -m ${module_id} grep -E "^limit" privatebin/conf.php
+    Should Contain    ${conf}    limit = 30
+    ${config} =    Run task    module/${module_id}/get-configuration    {}
+    Should Be Equal As Integers    ${config}[rate_limit]    30
+    Run task    module/${module_id}/configure-module    {${BASE_CONFIG}}
+
 Check if a document is stored
     # A well formed body from an address with no delay yet
     ${port} =    Execute Command    runagent -m ${module_id} sh -c 'grep ^TCP_PORT= environment | cut -d= -f2'

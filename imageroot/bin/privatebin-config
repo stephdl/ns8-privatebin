@@ -102,7 +102,7 @@ sections = {
     # Only open creation needs it: PrivateBin skips it for the creators
     # networks, and a login would block users behind the same NAT
     "traffic": {"limit": "0" if settings["private_creators"] or settings["ldap_domain"]
-                else str(int(settings["rate_limit"]) or 30)},
+                else str(int(settings["rate_limit"]))},
     "model": {"class": "Filesystem"},
     # PrivateBin refuses to start without this section, PATH is a PHP constant
     "model_options": {"dir": 'PATH "data"'},

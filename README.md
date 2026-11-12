@@ -51,7 +51,7 @@ EOF
 | `host` | | Host name of the Traefik route. HTTPS is always forced. |
 | `lets_encrypt` | `false` | Request a Let's Encrypt certificate. |
 | `private_creators` | `true` | Only private networks can create documents, see below. |
-| `rate_limit` | `30` | Seconds between two documents from the same address, 10 to 300. Used only when creation is open to the Internet without login. An old `0` means 30. |
+| `rate_limit` | `30` | Seconds between two documents from the same address, 10 to 300. Used only when creation is open to the Internet without login. An old `0` is stored as 30. |
 | `ldap_domain` | `""` | User domain whose users must log in to create documents and comments. Empty for no login. |
 | `name` | `PrivateBin` | Service name in the browser title and the navigation bar. |
 | `notice` | empty | Plain text banner above the editor. |

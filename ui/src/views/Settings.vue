@@ -171,7 +171,7 @@
                 ref="ldap_domain"
               />
             </template>
-            <template v-if="!isPrivateCreators && !isLdapEnabled">
+            <template v-if="isDelayShown">
               <label class="bx--label">
                 {{ $t("settings.rate_limit") }}
                 <cv-interactive-tooltip
@@ -606,6 +606,18 @@ export default {
     };
   },
   computed: {
+    // The delay only applies when anyone on the Internet can create without login
+    isDelayShown() {
+      return !this.isPrivateCreators && !this.isLdapEnabled;
+    },
+    // A hidden slider may hold a value typed before it was hidden
+    rateLimitToSend() {
+      const value = parseInt(this.rateLimit, 10);
+      if (!this.isDelayShown && !(value >= 10 && value <= 300)) {
+        return 30;
+      }
+      return value;
+    },
     ...mapState(["instanceName", "core", "appName"]),
     stillLoading() {
       return (
@@ -810,7 +822,7 @@ export default {
       this.sizeLimit = String(config.size_limit);
       this.isLanguageSelectionEnabled = config.language_selection;
       this.isPrivateCreators = config.private_creators;
-      this.rateLimit = String(config.rate_limit > 0 ? config.rate_limit : 30);
+      this.rateLimit = String(config.rate_limit);
       this.ldapDomainList = config.ldap_domain_list;
       this.ldapDomain = config.ldap_domain;
       this.isLdapEnabled = Boolean(config.ldap_domain);
@@ -869,7 +881,7 @@ export default {
         } else {
           this.error[param] = "settings." + validationError.error;
           this.openAdvancedFor(param);
-          if (!focusAlreadySet && param !== "logo") {
+          if (!focusAlreadySet && param !== "logo" && this.$refs[param]) {
             this.focusElement(param);
             focusAlreadySet = true;
           }
@@ -914,7 +926,7 @@ export default {
         language_selection: this.isLanguageSelectionEnabled,
         language_default: this.languageDefault,
         private_creators: this.isPrivateCreators,
-        rate_limit: parseInt(this.rateLimit, 10),
+        rate_limit: this.rateLimitToSend,
         ldap_domain: this.isLdapEnabled ? this.ldapDomain : "",
       };
       // without the logo key the backend keeps the current logo
