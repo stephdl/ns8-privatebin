@@ -65,7 +65,8 @@ size_limit = int(settings["size_limit"])
 main = {
     "name": ini_string(settings["name"] or "PrivateBin"),
     "basepath": ini_string("https://" + os.environ["TRAEFIK_HOST"] + "/"),
-    "discussion": ini_bool(settings["discussion"]),
+    # PrivateBin 2.1.0 editor crashes in resetInput() without discussions, keep them on
+    "discussion": "true",
     "opendiscussion": ini_bool(settings["open_discussion"]),
     "burnafterreadingselected": ini_bool(settings["burn_after_reading_selected"]),
     "fileupload": ini_bool(settings["file_upload"]),

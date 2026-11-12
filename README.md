@@ -34,7 +34,7 @@ api-cli run module/privatebin1/configure-module --data - <<'EOF'
   "info": "",
   "expire_default": "1week",
   "expire_max": "1year",
-  "discussion": false,
+  "discussion": true,
   "open_discussion": false,
   "burn_after_reading_selected": false,
   "qrcode": true,
@@ -58,7 +58,7 @@ EOF
 | `info` | empty | Footer text, HTML allowed. |
 | `expire_default` | `1week` | Expiration selected by default. |
 | `expire_max` | `1year` | Longest expiration offered. Longer ones, `never` included, are removed from the list. |
-| `discussion` | `false` | Allow comments under documents. |
+| `discussion` | `true` | Always on: the PrivateBin 2.1.0 editor fails to start without discussions. The value is ignored. |
 | `open_discussion` | `false` | Preselect the discussion option. |
 | `burn_after_reading_selected` | `false` | Preselect burn after reading. |
 | `qrcode` | `true` | Offer a QR code of the document link. |

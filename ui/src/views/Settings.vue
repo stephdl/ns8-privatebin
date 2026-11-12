@@ -330,21 +330,6 @@
                     }}</template>
                   </NsToggle>
                   <NsToggle
-                    value="discussion"
-                    :label="$t('settings.discussion')"
-                    v-model="isDiscussionEnabled"
-                    :disabled="stillLoading"
-                    class="mg-bottom"
-                  >
-                    <template slot="text-left">{{
-                      $t("settings.disabled")
-                    }}</template>
-                    <template slot="text-right">{{
-                      $t("settings.enabled")
-                    }}</template>
-                  </NsToggle>
-                  <NsToggle
-                    v-if="isDiscussionEnabled"
                     value="openDiscussion"
                     :label="$t('settings.open_discussion')"
                     v-model="isOpenDiscussion"
@@ -599,7 +584,6 @@ export default {
       expireDefault: "",
       expireMax: "",
       languageDefault: "",
-      isDiscussionEnabled: false,
       isOpenDiscussion: false,
       isBurnAfterReadingSelected: false,
       isQrcodeEnabled: true,
@@ -834,7 +818,6 @@ export default {
       this.expireMax = config.expire_max;
       this.expireDefault = config.expire_default;
       this.languageDefault = config.language_default;
-      this.isDiscussionEnabled = config.discussion;
       this.isOpenDiscussion = config.open_discussion;
       this.isBurnAfterReadingSelected = config.burn_after_reading_selected;
       this.isQrcodeEnabled = config.qrcode;
@@ -938,8 +921,8 @@ export default {
         info: this.info,
         expire_default: this.expireDefault,
         expire_max: this.expireMax,
-        discussion: this.isDiscussionEnabled,
-        open_discussion: this.isDiscussionEnabled && this.isOpenDiscussion,
+        discussion: true,
+        open_discussion: this.isOpenDiscussion,
         burn_after_reading_selected: this.isBurnAfterReadingSelected,
         qrcode: this.isQrcodeEnabled,
         file_upload: this.isFileUploadEnabled,

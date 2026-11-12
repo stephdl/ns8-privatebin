@@ -69,7 +69,6 @@
     "expire_default_above_max": "The default expiration cannot be longer than the longest expiration",
     "burn_after_reading_selected": "Burn after reading checked by default",
     "burn_after_reading_selected_tooltip": "The document is deleted after its first reading. Users can still uncheck it.",
-    "discussion": "Discussions",
     "open_discussion": "Discussion checked by default",
     "qrcode": "QR code of the document link",
     "attachments": "Attachments",
