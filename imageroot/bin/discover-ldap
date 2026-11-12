@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# Write the ldapproxy address of the login user domain, and the pod network
+# that forwards only that port to the node loopback
+
+import json
+import os
+
+from agent.ldapproxy import Ldapproxy
+
+
+def write_env(name, lines):
+    tmpfile = f"{name}.{os.getpid()}"
+    with open(tmpfile, "w") as fo:
+        os.fchmod(fo.fileno(), 0o600)
+        fo.write("".join(line + "\n" for line in lines))
+    os.replace(tmpfile, name)
+
+
+try:
+    with open("privatebin/settings.json") as fi:
+        domain = json.load(fi).get("ldap_domain", "")
+except FileNotFoundError:
+    domain = ""
+
+odom = Ldapproxy().get_domain(domain) if domain else None
+if odom:
+    write_env("discovery_ldap.env", [
+        "LDAP_HOST=127.0.0.1",
+        f"LDAP_PORT={odom['port']}",
+        f"LDAP_USER={odom['bind_dn']}",
+        f"LDAP_PASS={odom['bind_password']}",
+        f"LDAP_SCHEMA={odom['schema']}",
+        f"LDAP_BASE={odom['base_dn']}",
+        f"LDAP_HIDDEN_USERS={','.join(odom['hidden_users'])}",
+    ])
+    # pasta forwards this single port to the node loopback, nothing else
+    pod_network = f"pasta:-T,{odom['port']}"
+else:
+    # No login, or the domain is missing during a restore: every login is
+    # refused until the user-domain-changed event brings it back
+    write_env("discovery_ldap.env", ["LDAP_HOST="])
+    pod_network = "pasta"
+write_env("pod.env", [f"POD_NETWORK={pod_network}"])

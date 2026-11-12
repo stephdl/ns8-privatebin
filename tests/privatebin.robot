@@ -9,9 +9,11 @@ ${CLUSTER_USER}     admin
 ${CLUSTER_PASSWORD}    Nethesis,1234
 # Any resolvable-looking name: the schema demands a dot, nothing resolves it.
 ${TEST_HOST}    privatebin.ns8-ci.test
-${BASE_CONFIG}    "host":"${TEST_HOST}","lets_encrypt":false,"name":"CI \\"Paste\\" $HOME","notice":"Test banner","info":"","expire_default":"1day","expire_max":"1month","discussion":true,"open_discussion":false,"burn_after_reading_selected":false,"qrcode":true,"file_upload":true,"size_limit":20,"language_selection":true,"language_default":"auto","private_creators":false,"rate_limit":45
+${BASE_CONFIG}    "host":"${TEST_HOST}","lets_encrypt":false,"name":"CI \\"Paste\\" $HOME","notice":"Test banner","info":"","expire_default":"1day","expire_max":"1month","discussion":true,"open_discussion":false,"burn_after_reading_selected":false,"qrcode":true,"file_upload":true,"size_limit":20,"language_selection":true,"language_default":"auto","private_creators":false,"rate_limit":45,"ldap_domain":""
 # Random bytes: PrivateBin refuses a low entropy ciphertext, it never decrypts it
 ${CIPHERTEXT}    Q2WeGrkRJu9IIss/xjqKWBo5RXcHxf2LS1yxUGvYkChAtiW5Q7En8eh+h5jGqC0MRa5cxilIpmKREz9VR1Oomc+cFE22vsG1oCNhze8+wWLBPLKVxrqIRCXaAe8c7AmpdpigESc3UJCQIgxa8FcCC7Tw4kAyclHS7RechkA/ThutETeoWauCfjTaRhXSwv7xv58yKupXD6zQfK46fXMYwW5dQ74Absoqwm/uFzAU94U6RzFIPyioSlC65sfD1OcPJrA4q6OejYR3Z/q+v7wUnBQALaoKRQWs9mI30mJ5o3sCNox9jpM9/MkmYNrcpedA
+${USER_DOMAIN}    privatebin.ns8-ci.test
+${COOKIES}    /tmp/privatebin.cookies
 # 1x1 PNG
 ${LOGO}    iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==
 
@@ -43,6 +45,28 @@ Post a document from
     ${answer} =    Execute Command
     ...    curl -s -H 'X-Requested-With: JSONHttpRequest' -H 'X-Forwarded-For: ${forwarded_for}' --data '{"v":2,"ct":"x"}' http://127.0.0.1:${port}/
     RETURN    ${answer}
+
+Curl status
+    [Documentation]    Query PrivateBin through Traefik with the cookie jar,
+    ...                return the status code and the redirect target.
+    [Arguments]    ${path}    ${options}=${EMPTY}
+    ${status} =    Execute Command
+    ...    curl -sk -o /dev/null -w '\%{http_code} \%{redirect_url}' --resolve ${TEST_HOST}:443:127.0.0.1 -b ${COOKIES} -c ${COOKIES} ${options} https://${TEST_HOST}${path}
+    RETURN    ${status}
+
+Log in to PrivateBin
+    [Arguments]    ${user}    ${password}
+    ${status} =    Curl status    /_auth/api/login
+    ...    -X POST -H 'Content-Type: application/json' --data '{"username":"${user}","password":"${password}"}'
+    RETURN    ${status.strip()}
+
+Editor asks for a login
+    ${status} =    Curl status    /
+    Should Be Equal    ${status}    302 https://${TEST_HOST}/_auth/login
+
+Editor is open
+    ${status} =    Curl status    /
+    Should Be Equal    ${status.strip()}    200
 
 Enable the stephdl forge
     ${repos} =    Execute Command    api-cli run cluster/list-repositories
@@ -188,6 +212,75 @@ Check if an update keeps the configuration and the documents
     Should Contain    ${svg}    data:image/png;base64,${LOGO}
     Read the stored document
 
+Check if the user domain is installed
+    ${response} =    Run task    add-internal-provider    {"image":"openldap","node":1}
+    Set Suite Variable    ${ldap_id}    ${response['module_id']}
+    Run task    module/${ldap_id}/configure-module
+    ...    {"domain":"${USER_DOMAIN}","admuser":"admin","admpass":"Nethesis,1234","provision":"new-domain"}
+    Run task    module/${ldap_id}/add-user
+    ...    {"user":"alice","display_name":"Alice","password":"Nethesis,1234"}
+    ${config} =    Run task    module/${module_id}/get-configuration    {}
+    Should Contain    ${config}[ldap_domain_list]    ${USER_DOMAIN}
+
+Check if creation asks for a login
+    Execute Command    rm -f ${COOKIES}
+    ${ldap_config} =    Evaluate    $BASE_CONFIG.replace('"ldap_domain":""', '"ldap_domain":"%s"' % $USER_DOMAIN)
+    Run task    module/${module_id}/configure-module    {${ldap_config}}
+    Wait Until Keyword Succeeds    20 times    3 seconds
+    ...    Editor asks for a login
+    ${login_page} =    Curl status    /_auth/login
+    Should Be Equal    ${login_page.strip()}    200
+    ${post} =    Curl status    /    -H 'X-Requested-With: JSONHttpRequest' --data '{"v":2,"ct":"x"}'
+    Should Be Equal    ${post.strip()}    401
+
+Check if a document link opens without login
+    ${status} =    Curl status    /?0123456789abcdef
+    Should Be Equal    ${status.strip()}    200
+    ${status} =    Curl status    /js/privatebin.js
+    Should Be Equal    ${status.strip()}    200
+
+Check if an unknown user domain is rejected
+    ${bad_config} =    Evaluate    $BASE_CONFIG.replace('"ldap_domain":""', '"ldap_domain":"unknown.ns8-ci.test"')
+    ${output} =    Run task    module/${module_id}/configure-module    {${bad_config}}
+    ...    decode_json=${FALSE}    rc_expected=2
+    Should Contain    ${output}    ldap_domain_unknown
+
+Check if a login without JSON is refused
+    ${status} =    Curl status    /_auth/api/login
+    ...    -X POST -H 'Content-Type: text/plain' --data '{"username":"alice","password":"Nethesis,1234"}'
+    Should Be Equal    ${status.strip()}    415
+
+Check if a wrong password is refused
+    ${status} =    Log in to PrivateBin    alice    wrong-password
+    Should Be Equal    ${status}    401
+    ${output} =    Execute Command    journalctl --since -5min --no-pager | grep -c "login failed user='alice'"
+    Should Be True    ${output} >= 1
+
+Check if a logged in user can create documents
+    ${status} =    Log in to PrivateBin    alice    Nethesis,1234
+    Should Be Equal    ${status}    200
+    Editor is open
+    ${answer} =    Execute Command
+    ...    curl -sk --resolve ${TEST_HOST}:443:127.0.0.1 -b ${COOKIES} -H 'X-Requested-With: JSONHttpRequest' --data '{"v":2,"ct":"x"}' https://${TEST_HOST}/
+    Should Contain    ${answer}    Invalid data
+
+Check if logging out closes the editor
+    Curl status    /_auth/api/logout    -X POST
+    Editor asks for a login
+
+Check if repeated failures are blocked
+    FOR    ${i}    IN RANGE    10
+        Log in to PrivateBin    alice    wrong-password
+    END
+    ${status} =    Log in to PrivateBin    alice    Nethesis,1234
+    Should Be Equal    ${status}    429
+
+Check if creation is open again without a domain
+    Run task    module/${module_id}/configure-module    {${BASE_CONFIG}}
+    Wait Until Keyword Succeeds    20 times    3 seconds
+    ...    Editor is open
+    Execute Command    rm -f ${COOKIES}
+
 Take screenshots of the module pages
     [Documentation]    Capture what cluster-admin shows, for the software center
     ...                entry. Tagged ui: the shared runner skips it unless
@@ -224,3 +317,6 @@ Check if privatebin is removed correctly
     ${rc} =    Execute Command    remove-module --no-preserve ${module_id}
     ...    return_rc=True  return_stdout=False
     Should Be Equal As Integers    ${rc}  0
+
+Check if the user domain is removed correctly
+    Run task    remove-internal-domain    {"domain":"${USER_DOMAIN}"}

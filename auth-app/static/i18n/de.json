@@ -1,0 +1,17 @@
+{
+  "language": "Sprache",
+  "logout": "Abmelden",
+  "username": "Benutzername",
+  "password": "Passwort",
+  "login": "Anmelden",
+  "login_invalid": "Falscher Benutzername oder falsches Passwort.",
+  "login_blocked": "Zu viele fehlgeschlagene Versuche. Versuchen Sie es später erneut.",
+  "login_error": "Der Anmeldedienst ist nicht verfügbar. Versuchen Sie es später erneut.",
+  "show_password": "Passwort anzeigen",
+  "hide_password": "Passwort verbergen",
+  "remember": "7 Tage angemeldet bleiben",
+  "title": "Melden Sie sich an, um ein Dokument zu erstellen",
+  "lead": "Mit Ihnen geteilte Links öffnen sich ohne Konto.",
+  "open": "Dokument erstellen",
+  "logged_in": "Angemeldet als {name}."
+}

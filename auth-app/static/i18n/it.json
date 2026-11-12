@@ -1,0 +1,17 @@
+{
+  "language": "Lingua",
+  "logout": "Esci",
+  "username": "Nome utente",
+  "password": "Password",
+  "login": "Accedi",
+  "login_invalid": "Nome utente o password errati.",
+  "login_blocked": "Troppi tentativi falliti. Riprova più tardi.",
+  "login_error": "Il servizio di accesso non è disponibile. Riprova più tardi.",
+  "show_password": "Mostra password",
+  "hide_password": "Nascondi password",
+  "remember": "Resta connesso per 7 giorni",
+  "title": "Accedi per creare un documento",
+  "lead": "I link condivisi con te si aprono senza account.",
+  "open": "Crea un documento",
+  "logged_in": "Accesso effettuato come {name}."
+}

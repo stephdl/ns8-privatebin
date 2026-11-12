@@ -4,9 +4,10 @@
 PrivateBin shares text and files with end-to-end encryption: documents are
 encrypted in the browser and the server never sees their content.
 
-The module runs the official `privatebin/nginx-fpm-alpine` image in one
-rootless container with a read-only root filesystem. It needs no database and
-no user domain. Documents are stored as files in the `privatebin-data` volume.
+The module runs the official `privatebin/nginx-fpm-alpine` image in a rootless
+pod with a read-only root filesystem. It needs no database. A user domain is
+optional, to ask for a login before creating documents. Documents are stored as
+files in the `privatebin-data` volume.
 
 ## Install
 
@@ -33,7 +34,7 @@ api-cli run module/privatebin1/configure-module --data - <<'EOF'
   "info": "",
   "expire_default": "1week",
   "expire_max": "1year",
-  "discussion": false,
+  "discussion": true,
   "open_discussion": false,
   "burn_after_reading_selected": false,
   "qrcode": true,
@@ -51,12 +52,13 @@ EOF
 | `lets_encrypt` | `false` | Request a Let's Encrypt certificate. |
 | `private_creators` | `true` | Only private networks can create documents, see below. |
 | `rate_limit` | `30` | Seconds between two documents from the same address, 10 to 300, `0` for no delay. Ignored when `private_creators` is on. |
+| `ldap_domain` | `""` | User domain whose users must log in to create documents and comments. Empty for no login. |
 | `name` | `PrivateBin` | Service name in the browser title and the navigation bar. |
 | `notice` | empty | Plain text banner above the editor. |
 | `info` | empty | Footer text, HTML allowed. |
 | `expire_default` | `1week` | Expiration selected by default. |
 | `expire_max` | `1year` | Longest expiration offered. Longer ones, `never` included, are removed from the list. |
-| `discussion` | `false` | Allow comments under documents. |
+| `discussion` | `true` | Always on: the PrivateBin 2.1.0 editor fails to start without discussions. The value is ignored. |
 | `open_discussion` | `false` | Preselect the discussion option. |
 | `burn_after_reading_selected` | `false` | Preselect burn after reading. |
 | `qrcode` | `true` | Offer a QR code of the document link. |
@@ -89,6 +91,29 @@ otherwise PrivateBin answers "Please wait N seconds between each post". This
 slows down a bot that posts in a loop. It does not stop a bot with many
 addresses. This is PrivateBin's `[traffic] limit` option. PrivateBin skips it
 for the `creators` networks, which is why the UI hides it in private mode.
+
+**Login to create**, off by default. With `ldap_domain` set, the editor sends
+the visitor to a login page, and creating a document or posting a comment
+needs a session of a user of that domain. Opening a link needs no login, so a
+document can still be shared with someone outside. Everything is decided by the
+URL, not by the encrypted body: a comment is a POST like a document, so a
+reader without account can read a discussion but not answer it. The private
+networks rule above still applies on top of the login.
+
+The login runs in a small `privatebin-auth` container in the same pod, built
+from this repository. nginx asks it before each request with `auth_request`,
+so the PrivateBin image stays the official one. Its pages are under `/_auth/`:
+`/_auth/login` logs in and out. A session lasts 8 hours, or 7 days with "Keep
+me logged in", and the account is checked again in LDAP every hour, so a
+locked or removed user loses access soon. After 10 wrong passwords from one
+address in 15 minutes, the login answers 429 for the rest of the window.
+Changing the domain logs everybody out. Sessions are signed cookies with no
+server state: logging out removes the cookie from the browser, but a copied
+cookie stays valid until it expires.
+
+The pod uses the pasta network and forwards only the ldapproxy port of the
+chosen domain to the node loopback. PrivateBin itself cannot reach the other
+services of the node loopback.
 
 **Visitor address.** Traefik replaces any `X-Forwarded-For` sent by the client.
 nginx reads that header from the right and skips the private hops, so the
@@ -124,7 +149,10 @@ change it. A 50 MiB document needs about 9 Mbit/s of upload speed.
 
 The backup holds `settings.json`, the custom logo and the `privatebin-data`
 volume, which contains the documents, the comments and the server salt. The
-other files are generated again on restore.
+other files are generated again on restore. The session key is not saved:
+users log in again after a restore or a clone. When the user domain comes back
+after PrivateBin during a restore, the `user-domain-changed` event binds it
+again and restarts the login container.
 
 A restore or a plain clone keeps the source host. When that host is already
 used on the cluster, the instance gets no route: Settings shows a warning, and
@@ -136,7 +164,7 @@ saving a new host name publishes it.
 
 ## Debug
 
-    runagent -m privatebin1 systemctl --user status privatebin.service privatebin-app.service privatebin-purge.timer
+    runagent -m privatebin1 systemctl --user status privatebin.service privatebin-app.service privatebin-auth.service privatebin-purge.timer
     runagent -m privatebin1 cat privatebin/conf.php
     journalctl _UID=$(id -u privatebin1)
 

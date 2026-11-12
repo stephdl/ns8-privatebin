@@ -1,0 +1,17 @@
+{
+  "language": "Idioma",
+  "logout": "Cerrar sesión",
+  "username": "Nombre de usuario",
+  "password": "Contraseña",
+  "login": "Iniciar sesión",
+  "login_invalid": "Usuario o contraseña incorrectos.",
+  "login_blocked": "Demasiados intentos fallidos. Inténtelo más tarde.",
+  "login_error": "El servicio de inicio de sesión no está disponible. Inténtelo más tarde.",
+  "show_password": "Mostrar contraseña",
+  "hide_password": "Ocultar contraseña",
+  "remember": "Mantener la sesión durante 7 días",
+  "title": "Inicie sesión para crear un documento",
+  "lead": "Los enlaces compartidos con usted se abren sin cuenta.",
+  "open": "Crear un documento",
+  "logged_in": "Sesión iniciada como {name}."
+}

@@ -4,7 +4,7 @@
     "info": "",
     "expire_default": "1week",
     "expire_max": "1year",
-    "discussion": false,
+    "discussion": true,
     "open_discussion": false,
     "burn_after_reading_selected": false,
     "qrcode": true,
@@ -13,5 +13,6 @@
     "language_selection": true,
     "language_default": "auto",
     "private_creators": true,
-    "rate_limit": 30
+    "rate_limit": 30,
+    "ldap_domain": ""
 }

@@ -69,7 +69,6 @@
     "expire_default_above_max": "The default expiration cannot be longer than the longest expiration",
     "burn_after_reading_selected": "Burn after reading checked by default",
     "burn_after_reading_selected_tooltip": "The document is deleted after its first reading. Users can still uncheck it.",
-    "discussion": "Discussions",
     "open_discussion": "Discussion checked by default",
     "qrcode": "QR code of the document link",
     "attachments": "Attachments",
@@ -106,7 +105,18 @@
     "rate_limit_delay": "Delay for the same address, from 10 to 300 seconds",
     "seconds": "seconds",
     "no_limit_title": "No delay",
-    "no_limit_description": "A bot can create documents as fast as the server answers."
+    "no_limit_description": "A bot can create documents as fast as the server answers.",
+    "ldap_login": "Require a login to create documents",
+    "ldap_login_tooltip": "Users of a domain log in before they create a document or a comment. Reading a link needs no login, so you can still share a document with someone outside. The network restriction above still applies.",
+    "ldap_domain": "User domain",
+    "choose_ldap_domain": "Choose a user domain",
+    "ldap_domain_unknown": "This user domain does not exist anymore",
+    "ldap_domain_helper": "Every user of this domain can create documents. Comments need a login too.",
+    "creation_ldap_title": "Users log in to create documents",
+    "creation_ldap_description": "The editor asks for a login of the chosen user domain. Anyone can open a link, but only logged in users can create documents or post comments. Users log out at /_auth/login.",
+    "no_domain_title": "No user domain",
+    "no_domain_description": "Create or connect a user domain to require a login.",
+    "go_to_domains": "Go to Domains and users"
   },
   "about": {
     "title": "About"

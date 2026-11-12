@@ -18,6 +18,7 @@ reponame="privatebin"
 # renovate: datasource=npm packageName=corepack
 corepack_version=0.36.0
 privatebin_image="docker.io/privatebin/nginx-fpm-alpine:2.1.1"
+auth_image="${repobase}/${reponame}-auth"
 
 # Show the PrivateBin version in the About page, restore the metadata on exit
 metadata_file="ui/public/metadata.json"
@@ -31,6 +32,10 @@ trap cleanup EXIT
 jq --arg v "${privatebin_image##*:}" \
    '.upstream_name |= gsub("version set automatically"; $v)' \
    "${metadata_file}" > "${metadata_file}.tmp" && mv "${metadata_file}.tmp" "${metadata_file}"
+
+# Build the LDAP login sidecar
+buildah build --layers --force-rm --tag "${auth_image}" auth-app
+images+=("${auth_image}")
 
 # Create a new empty container image
 container=$(buildah from scratch)
@@ -54,11 +59,11 @@ buildah add "${container}" imageroot /imageroot
 buildah add "${container}" ui/dist /ui
 
 buildah config --entrypoint=/ \
-    --label="org.nethserver.authorizations=traefik@node:routeadm" \
+    --label="org.nethserver.authorizations=traefik@node:routeadm cluster:accountconsumer" \
     --label="org.nethserver.tcp-ports-demand=1" \
     --label="org.nethserver.rootfull=0" \
     --label="org.nethserver.min-core=3.20.1" \
-    --label="org.nethserver.images=${privatebin_image}" \
+    --label="org.nethserver.images=${privatebin_image} ${auth_image}:${IMAGETAG:-latest}" \
     --label="org.nethserver.volumes=privatebin-data" \
     "${container}"
 # Commit the image

@@ -11,6 +11,7 @@ import json
 import base64
 import binascii
 import agent
+from agent.ldapproxy import Ldapproxy
 
 EXPIRE_ORDER = ["5min", "10min", "1hour", "1day", "1week", "1month", "1year", "never"]
 LOGO_MAX_BYTES = 512 * 1024
@@ -23,6 +24,10 @@ errors = []
 
 if EXPIRE_ORDER.index(data["expire_default"]) > EXPIRE_ORDER.index(data["expire_max"]):
     errors.append({'field': 'expire_default', 'parameter': 'expire_default', 'value': data["expire_default"], 'error': 'expire_default_above_max'})
+
+# An unknown domain would refuse every login and block the creation
+if data["ldap_domain"] and data["ldap_domain"] not in Ldapproxy().get_domains_list():
+    errors.append({'field': 'ldap_domain', 'parameter': 'ldap_domain', 'value': data["ldap_domain"], 'error': 'ldap_domain_unknown'})
 
 logo = data.get("logo")
 if logo:

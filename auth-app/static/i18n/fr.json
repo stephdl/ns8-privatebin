@@ -1,0 +1,17 @@
+{
+  "language": "Langue",
+  "logout": "Déconnexion",
+  "username": "Nom d'utilisateur",
+  "password": "Mot de passe",
+  "login": "Se connecter",
+  "login_invalid": "Nom d'utilisateur ou mot de passe incorrect.",
+  "login_blocked": "Trop de tentatives échouées. Réessayez plus tard.",
+  "login_error": "Le service de connexion n'est pas disponible. Réessayez plus tard.",
+  "show_password": "Afficher le mot de passe",
+  "hide_password": "Masquer le mot de passe",
+  "remember": "Rester connecté pendant 7 jours",
+  "title": "Connectez-vous pour créer un document",
+  "lead": "Les liens partagés avec vous s'ouvrent sans compte.",
+  "open": "Créer un document",
+  "logged_in": "Connecté en tant que {name}."
+}

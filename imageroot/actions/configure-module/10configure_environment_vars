@@ -28,6 +28,7 @@ SETTINGS = [
     "language_default",
     "private_creators",
     "rate_limit",
+    "ldap_domain",
 ]
 
 
@@ -52,6 +53,11 @@ agent.set_env("TRAEFIK_LETS_ENCRYPT", data["lets_encrypt"])
 
 # Free text like HTML breaks the systemd environment file: keep it in JSON
 os.makedirs("privatebin", exist_ok=True)
+try:
+    with open("privatebin/settings.json") as fi:
+        previous_domain = json.load(fi).get("ldap_domain", "")
+except FileNotFoundError:
+    previous_domain = ""
 with open("privatebin/settings.json.tmp", "w") as fo:
     json.dump({key: data[key] for key in SETTINGS}, fo, indent=4)
 os.replace("privatebin/settings.json.tmp", "privatebin/settings.json")
@@ -73,6 +79,14 @@ if logo:
 elif logo == "":
     try:
         os.remove("privatebin/icon.svg")
+    except FileNotFoundError:
+        pass
+
+agent.bind_user_domains([data["ldap_domain"]] if data["ldap_domain"] else [], check=True)
+# A user name means someone else in another domain: privatebin-config signs new sessions
+if data["ldap_domain"] != previous_domain:
+    try:
+        os.remove("privatebin/session.env")
     except FileNotFoundError:
         pass
 

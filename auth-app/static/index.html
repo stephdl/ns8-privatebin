@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PrivateBin</title>
+  <link rel="stylesheet" href="/_auth/static/style.css">
+  <script src="/_auth/static/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <span class="brand">PrivateBin</span>
+      <label for="lang" class="sr-only" data-i18n="language">Language</label>
+      <select id="lang"></select>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <span class="eyebrow" id="hostname"></span>
+      <h1 data-i18n="title">Log in to create a document</h1>
+      <p data-i18n="lead">Links shared with you open without an account.</p>
+    </section>
+
+    <section id="login-view" class="login" hidden>
+      <form id="login-form" class="panel" novalidate>
+        <div class="field">
+          <label for="username" data-i18n="username">Username</label>
+          <input id="username" name="username" type="text" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password" data-i18n="password">Password</label>
+          <div class="password">
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+            <button id="toggle-password" class="reveal" type="button" aria-pressed="false" aria-controls="password">
+              <svg class="eye" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-off" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7c1.8 0 3.4-.5 4.8-1.3M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+            </button>
+          </div>
+        </div>
+        <label class="remember">
+          <input id="remember" name="remember" type="checkbox">
+          <span data-i18n="remember">Keep me logged in for 7 days</span>
+        </label>
+        <p id="login-error" class="error" role="alert" hidden></p>
+        <button class="btn primary" type="submit" data-i18n="login">Log in</button>
+      </form>
+    </section>
+
+    <section id="user-view" class="login" hidden>
+      <div class="panel">
+        <p id="user"></p>
+        <a class="btn primary" href="/" data-i18n="open">Create a document</a>
+        <button id="logout" class="btn" type="button" data-i18n="logout">Log out</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

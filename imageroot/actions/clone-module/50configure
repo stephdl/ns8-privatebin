@@ -12,6 +12,12 @@ import agent
 
 request = json.load(sys.stdin)
 
+# The copy must not accept the login sessions of its source
+try:
+    os.remove("privatebin/session.env")
+except FileNotFoundError:
+    pass
+
 # A plain clone runs next to its source: the admin must give it a new host name
 if not request.get("replace"):
     # The copied logo.env still points to the source module state directory

@@ -23,7 +23,9 @@
             "language_selection": true,
             "language_default": "auto",
             "private_creators": true,
-            "rate_limit": 30
+            "rate_limit": 30,
+            "ldap_domain": "ad.example.org",
+            "ldap_domain_list": ["ad.example.org"]
         }
     ],
     "type": "object",
@@ -46,7 +48,9 @@
         "language_selection",
         "language_default",
         "private_creators",
-        "rate_limit"
+        "rate_limit",
+        "ldap_domain",
+        "ldap_domain_list"
     ],
     "properties": {
         "host": {
@@ -108,6 +112,15 @@
         },
         "rate_limit": {
             "type": "integer"
+        },
+        "ldap_domain": {
+            "type": "string",
+            "description": "User domain required to create documents, empty when creation needs no login"
+        },
+        "ldap_domain_list": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "User domains available on the cluster"
         }
     }
 }
