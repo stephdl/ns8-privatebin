@@ -51,7 +51,7 @@ EOF
 | `host` | | Host name of the Traefik route. HTTPS is always forced. |
 | `lets_encrypt` | `false` | Request a Let's Encrypt certificate. |
 | `private_creators` | `true` | Only private networks can create documents, see below. |
-| `rate_limit` | `30` | Seconds between two documents from the same address, 10 to 300, `0` for no delay. Ignored when `private_creators` is on. |
+| `rate_limit` | `30` | Seconds between two documents from the same address, 10 to 300. Used only when creation is open to the Internet without login. An old `0` is stored as 30. |
 | `ldap_domain` | `""` | User domain whose users must log in to create documents and comments. Empty for no login. |
 | `name` | `PrivateBin` | Service name in the browser title and the navigation bar. |
 | `notice` | empty | Plain text banner above the editor. |
@@ -85,12 +85,14 @@ authorized to create documents". Anyone can still open a link, so a document
 can be shared with someone outside. This is PrivateBin's `[traffic] creators`
 option.
 
-**Delay between documents**, only when private creation is off. After a
-document or a comment, the same address must wait `rate_limit` seconds,
-otherwise PrivateBin answers "Please wait N seconds between each post". This
-slows down a bot that posts in a loop. It does not stop a bot with many
-addresses. This is PrivateBin's `[traffic] limit` option. PrivateBin skips it
-for the `creators` networks, which is why the UI hides it in private mode.
+**Delay between documents**, mandatory when anyone on the Internet can create
+documents without a login. After a document or a comment, the same address
+must wait `rate_limit` seconds, otherwise PrivateBin answers "Please wait N
+seconds between each post". This slows down a bot that posts in a loop. It
+does not stop a bot with many addresses. This is PrivateBin's `[traffic] limit`
+option. It is turned off with private creation, which PrivateBin already skips
+for the `creators` networks, and with a login, where users behind the same NAT
+would block each other.
 
 **Login to create**, off by default. With `ldap_domain` set, the editor sends
 the visitor to a login page, and creating a document or posting a comment

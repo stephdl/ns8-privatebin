@@ -14,6 +14,20 @@ if [[ -z "${TRAEFIK_HOST}" ]]; then
     exit 0
 fi
 
+# rate_limit 0 used to turn the delay off. The delay is now mandatory for
+# open creation: store 30 so get-configuration matches the running config.
+python3 -c '
+import json, os
+path = "privatebin/settings.json"
+with open(path) as fi:
+    settings = json.load(fi)
+if settings.get("rate_limit") == 0:
+    settings["rate_limit"] = 30
+    with open(path + ".tmp", "w") as fo:
+        json.dump(settings, fo, indent=4)
+    os.replace(path + ".tmp", path)
+'
+
 # A new module version may write new settings
 runagent privatebin-config
 systemctl --user try-restart privatebin.service

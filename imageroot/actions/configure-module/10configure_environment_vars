@@ -59,7 +59,11 @@ try:
 except FileNotFoundError:
     previous_domain = ""
 with open("privatebin/settings.json.tmp", "w") as fo:
-    json.dump({key: data[key] for key in SETTINGS}, fo, indent=4)
+    settings = {key: data[key] for key in SETTINGS}
+    # 0 meant "no delay" before the delay became mandatory for open creation
+    if settings["rate_limit"] == 0:
+        settings["rate_limit"] = 30
+    json.dump(settings, fo, indent=4)
 os.replace("privatebin/settings.json.tmp", "privatebin/settings.json")
 
 logo = data.get("logo")
