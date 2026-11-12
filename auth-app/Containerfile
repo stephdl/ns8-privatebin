@@ -1,0 +1,10 @@
+FROM docker.io/library/python:3.13.18-alpine
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt \
+    && adduser -D -H -s /sbin/nologin privatebin-auth
+COPY server.py .
+COPY static ./static
+USER privatebin-auth
+EXPOSE 9080
+CMD ["python3", "-u", "server.py"]

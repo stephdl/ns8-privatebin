@@ -1,0 +1,17 @@
+{
+  "language": "Language",
+  "logout": "Log out",
+  "username": "Username",
+  "password": "Password",
+  "login": "Log in",
+  "login_invalid": "Wrong username or password.",
+  "login_blocked": "Too many failed attempts. Try again later.",
+  "login_error": "The login service is not available. Try again later.",
+  "show_password": "Show password",
+  "hide_password": "Hide password",
+  "remember": "Keep me logged in for 7 days",
+  "title": "Log in to create a document",
+  "lead": "Links shared with you open without an account.",
+  "open": "Create a document",
+  "logged_in": "Logged in as {name}."
+}
