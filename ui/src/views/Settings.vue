@@ -186,7 +186,6 @@
               </label>
               <NsSlider
                 v-model="rateLimit"
-                :label="$t('settings.rate_limit_delay')"
                 min="10"
                 max="300"
                 step="5"
