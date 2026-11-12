@@ -16,6 +16,8 @@ Before=privatebin-app.service privatebin-auth.service
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=-%S/state/environment
+Environment=POD_NETWORK=pasta
+EnvironmentFile=-%S/state/pod.env
 Restart=always
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/privatebin.pid %t/privatebin.pod-id
@@ -23,7 +25,7 @@ ExecStartPre=/usr/bin/podman pod create --infra-conmon-pidfile %t/privatebin.pid
     --pod-id-file %t/privatebin.pod-id \
     --name privatebin \
     --publish 127.0.0.1:${TCP_PORT}:8080 \
-    --network=slirp4netns:allow_host_loopback=true \
+    --network=${POD_NETWORK} \
     --replace
 ExecStart=/usr/bin/podman pod start --pod-id-file %t/privatebin.pod-id
 ExecStop=/usr/bin/podman pod stop --ignore --pod-id-file %t/privatebin.pod-id -t 10

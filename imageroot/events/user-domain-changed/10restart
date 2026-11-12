@@ -25,5 +25,6 @@ if "node_id" in event and str(event["node_id"]) != os.getenv("NODE_ID"):
 # After a restore the domain may come back after the module: bind it now,
 # the bind done by configure-module failed while the domain was missing.
 agent.bind_user_domains([domain])
-# discover-ldap runs again before the container starts
-agent.run_helper("systemctl", "--user", "-T", "try-restart", "privatebin-auth.service").check_returncode()
+# The ldapproxy port is part of the pod network: restart the whole pod
+agent.run_helper("discover-ldap").check_returncode()
+agent.run_helper("systemctl", "--user", "-T", "try-restart", "privatebin.service").check_returncode()

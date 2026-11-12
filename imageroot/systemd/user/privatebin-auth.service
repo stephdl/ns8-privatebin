@@ -17,7 +17,6 @@ WorkingDirectory=%S/state
 Restart=always
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/privatebin-auth.pid %t/privatebin-auth.ctr-id
-ExecStartPre=/usr/local/bin/runagent discover-ldap
 ExecStart=/usr/bin/podman run --conmon-pidfile %t/privatebin-auth.pid \
     --cidfile %t/privatebin-auth.ctr-id --cgroups=no-conmon \
     --pod-id-file %t/privatebin.pod-id --replace -d --name privatebin-auth \

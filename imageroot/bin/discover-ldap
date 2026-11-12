@@ -5,12 +5,22 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-# Write the ldapproxy address and credentials of the login user domain
+# Write the ldapproxy address of the login user domain, and the pod network
+# that forwards only that port to the node loopback
 
 import json
 import os
 
 from agent.ldapproxy import Ldapproxy
+
+
+def write_env(name, lines):
+    tmpfile = f"{name}.{os.getpid()}"
+    with open(tmpfile, "w") as fo:
+        os.fchmod(fo.fileno(), 0o600)
+        fo.write("".join(line + "\n" for line in lines))
+    os.replace(tmpfile, name)
+
 
 try:
     with open("privatebin/settings.json") as fi:
@@ -19,25 +29,21 @@ except FileNotFoundError:
     domain = ""
 
 odom = Ldapproxy().get_domain(domain) if domain else None
-if not odom:
-    # No login, or the domain is not available yet during a restore:
-    # point to nowhere, the user-domain-changed event fixes it later.
-    odom = {
-        "port": 20000,
-        "schema": "rfc2307",
-        "base_dn": "dc=privatebin,dc=invalid",
-        "bind_dn": "cn=example,dc=privatebin,dc=invalid",
-        "bind_password": "invalid",
-    }
-
-tmpfile = f"discovery_ldap.env.{os.getpid()}"
-with open(tmpfile, "w") as denv:
-    os.fchmod(denv.fileno(), 0o600)
-    # ldapproxy listens on the node loopback, reachable from slirp4netns as 10.0.2.2
-    print("LDAP_HOST=10.0.2.2", file=denv)
-    print(f"LDAP_PORT={odom['port']}", file=denv)
-    print(f"LDAP_USER={odom['bind_dn']}", file=denv)
-    print(f"LDAP_PASS={odom['bind_password']}", file=denv)
-    print(f"LDAP_SCHEMA={odom['schema']}", file=denv)
-    print(f"LDAP_BASE={odom['base_dn']}", file=denv)
-os.replace(tmpfile, "discovery_ldap.env")
+if odom:
+    write_env("discovery_ldap.env", [
+        "LDAP_HOST=127.0.0.1",
+        f"LDAP_PORT={odom['port']}",
+        f"LDAP_USER={odom['bind_dn']}",
+        f"LDAP_PASS={odom['bind_password']}",
+        f"LDAP_SCHEMA={odom['schema']}",
+        f"LDAP_BASE={odom['base_dn']}",
+        f"LDAP_HIDDEN_USERS={','.join(odom['hidden_users'])}",
+    ])
+    # pasta forwards this single port to the node loopback, nothing else
+    pod_network = f"pasta:-T,{odom['port']}"
+else:
+    # No login, or the domain is missing during a restore: every login is
+    # refused until the user-domain-changed event brings it back
+    write_env("discovery_ldap.env", ["LDAP_HOST="])
+    pod_network = "pasta"
+write_env("pod.env", [f"POD_NETWORK={pod_network}"])

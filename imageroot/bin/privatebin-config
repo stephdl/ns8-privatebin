@@ -11,6 +11,7 @@ import os
 import sys
 import json
 import secrets
+import subprocess
 
 EXPIRE_OPTIONS = [
     ("5min", 300),
@@ -166,5 +167,8 @@ if os.path.isfile("privatebin/icon.svg"):
 else:
     logo_env = "LOGO_VOLUME=\n"
 write_file("privatebin/logo.env", logo_env)
+
+# The pod network depends on the ldapproxy port: write it before the pod starts
+subprocess.run(["discover-ldap"], check=True)
 
 print("PrivateBin configuration written", file=sys.stderr)

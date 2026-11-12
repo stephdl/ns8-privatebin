@@ -109,6 +109,10 @@ locked or removed user loses access soon. After 10 wrong passwords from one
 address in 15 minutes, the login answers 429 for the rest of the window.
 Changing the domain logs everybody out.
 
+The pod uses the pasta network and forwards only the ldapproxy port of the
+chosen domain to the node loopback. PrivateBin itself cannot reach the other
+services of the node loopback.
+
 **Visitor address.** Traefik replaces any `X-Forwarded-For` sent by the client.
 nginx reads that header from the right and skips the private hops, so the
 first public address is the visitor, also behind Traefik trusted proxies. A
