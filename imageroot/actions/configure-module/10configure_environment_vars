@@ -82,7 +82,7 @@ elif logo == "":
     except FileNotFoundError:
         pass
 
-agent.bind_user_domains([data["ldap_domain"]] if data["ldap_domain"] else [])
+agent.bind_user_domains([data["ldap_domain"]] if data["ldap_domain"] else [], check=True)
 # A user name means someone else in another domain: privatebin-config signs new sessions
 if data["ldap_domain"] != previous_domain:
     try:
