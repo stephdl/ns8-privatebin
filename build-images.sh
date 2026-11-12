@@ -14,9 +14,10 @@ images=()
 repobase="${REPOBASE:-ghcr.io/nethserver}"
 # Configure the image name
 reponame="privatebin"
-privatebin_image="docker.io/privatebin/nginx-fpm-alpine:2.1.0"
+# Node.js 25+ no longer ships Corepack, install it from npm
 # renovate: datasource=npm packageName=corepack
 corepack_version=0.36.0
+privatebin_image="docker.io/privatebin/nginx-fpm-alpine:2.1.1"
 auth_image="${repobase}/${reponame}-auth"
 
 # Show the PrivateBin version in the About page, restore the metadata on exit
@@ -43,7 +44,6 @@ container=$(buildah from scratch)
 if ! buildah containers --format "{{.ContainerName}}" | grep -q nodebuilder-privatebin; then
     echo "Pulling NodeJS runtime..."
     buildah from --name nodebuilder-privatebin -v "${PWD}:/usr/src:Z" docker.io/library/node:26.13.0-slim
-    # Node 25 and later ship without corepack
     buildah run nodebuilder-privatebin sh -c "npm install -g corepack@${corepack_version} && corepack enable"
 fi
 
