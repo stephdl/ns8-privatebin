@@ -228,6 +228,9 @@ Check if creation asks for a login
     Run task    module/${module_id}/configure-module    {${ldap_config}}
     Wait Until Keyword Succeeds    20 times    3 seconds
     ...    Editor asks for a login
+    # The login replaces the delay: users behind the same NAT must not block each other
+    ${conf} =    Execute Command    runagent -m ${module_id} grep -E "^limit" privatebin/conf.php
+    Should Contain    ${conf}    limit = 0
     ${login_page} =    Curl status    /_auth/login
     Should Be Equal    ${login_page.strip()}    200
     ${post} =    Curl status    /    -H 'X-Requested-With: JSONHttpRequest' --data '{"v":2,"ct":"x"}'

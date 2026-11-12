@@ -141,7 +141,7 @@
             "description": "Only clients from private networks can create documents, anyone can read a link"
         },
         "rate_limit": {
-            "description": "Seconds between two documents from the same IP when creation is public, 0 disables the limit",
+            "description": "Seconds between two documents from the same IP when creation is open to the Internet without login. Ignored with private_creators or ldap_domain. 0 is kept for old configurations and means 30 there.",
             "oneOf": [
                 {
                     "type": "integer",
