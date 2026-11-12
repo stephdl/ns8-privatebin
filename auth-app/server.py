@@ -37,6 +37,9 @@ REMEMBER_TTL = 7 * 24 * 3600
 # or removed account loses access soon. nginx drops the Set-Cookie of an
 # auth_request answer, so the result is cached here and not in the cookie.
 RECHECK_INTERVAL = 3600
+# While LDAP is down, wait this long before the next try instead of
+# stalling every request on the connect timeout
+RETRY_INTERVAL = 60
 
 LDAP_HOST = os.environ.get("LDAP_HOST", "")
 LDAP_PORT = int(os.environ.get("LDAP_PORT", "0") or 0)
@@ -44,6 +47,8 @@ LDAP_BIND_DN = os.environ.get("LDAP_USER", "")
 LDAP_BIND_PASSWORD = os.environ.get("LDAP_PASS", "")
 LDAP_BASE = os.environ.get("LDAP_BASE", "")
 LDAP_SCHEMA = os.environ.get("LDAP_SCHEMA", "rfc2307")
+# Service accounts like ldapservice or Guest, hidden by ldapproxy
+LDAP_HIDDEN_USERS = {u.lower() for u in os.environ.get("LDAP_HIDDEN_USERS", "").split(",") if u}
 
 # Brute force guard: after MAX_FAILURES failed logins from one IP inside
 # FAILURE_WINDOW seconds, the login answers 429 until the window expires.
@@ -154,6 +159,8 @@ def ldap_find_user(conn, username):
     if len(conn.entries) != 1:
         return None
     entry = conn.entries[0]
+    if username.lower() in LDAP_HIDDEN_USERS:
+        return None
     if LDAP_SCHEMA == "ad":
         if int(entry.userAccountControl.value or 0) & 0x2:
             return None
@@ -190,12 +197,17 @@ def account_valid(uid):
         checked, valid = checks.get(uid, (0, True))
     if now - checked < RECHECK_INTERVAL:
         return valid
+    # Other requests of this user keep the cached answer during the check
+    with checks_lock:
+        checks[uid] = (now, valid)
     try:
         with ldap_connection(LDAP_BIND_DN, LDAP_BIND_PASSWORD) as conn:
             valid = ldap_find_user(conn, uid) is not None
     except ldap3.core.exceptions.LDAPException as ex:
-        # LDAP is down: keep the last answer and try again on the next request
+        # LDAP is down: keep the last answer, try again after RETRY_INTERVAL
         log(f"LDAP error: {ex}")
+        with checks_lock:
+            checks[uid] = (now - RECHECK_INTERVAL + RETRY_INTERVAL, valid)
         return valid
     with checks_lock:
         checks[uid] = (now, valid)
@@ -320,6 +332,10 @@ class Handler(BaseHTTPRequestHandler):
         return self.send(HTTPStatus.UNAUTHORIZED)
 
     def api_login(self, body):
+        # A cross-site form cannot send JSON without a CORS preflight, which
+        # we never allow: this blocks logging a victim into another account
+        if self.headers.get("Content-Type", "").split(";")[0].strip().lower() != "application/json":
+            return self.send_json(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, {"error": "json_required"})
         ip = self.client_ip()
         if too_many_failures(ip):
             log(f"login blocked ip={ip}")
@@ -330,6 +346,9 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(HTTPStatus.BAD_REQUEST, {"error": "bad_request"})
         username = body["username"][:256]
         remember = body.get("remember") is True
+        if not LDAP_HOST:
+            log(f"login refused user={username!r} ip={ip}: user domain not available")
+            return self.send_json(HTTPStatus.SERVICE_UNAVAILABLE, {"error": "ldap_unavailable"})
         try:
             result = ldap_authenticate(username, body["password"])
         except ldap3.core.exceptions.LDAPException as ex:

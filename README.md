@@ -107,7 +107,9 @@ so the PrivateBin image stays the official one. Its pages are under `/_auth/`:
 me logged in", and the account is checked again in LDAP every hour, so a
 locked or removed user loses access soon. After 10 wrong passwords from one
 address in 15 minutes, the login answers 429 for the rest of the window.
-Changing the domain logs everybody out.
+Changing the domain logs everybody out. Sessions are signed cookies with no
+server state: logging out removes the cookie from the browser, but a copied
+cookie stays valid until it expires.
 
 The pod uses the pasta network and forwards only the ldapproxy port of the
 chosen domain to the node loopback. PrivateBin itself cannot reach the other
