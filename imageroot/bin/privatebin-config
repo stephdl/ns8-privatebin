@@ -10,6 +10,7 @@
 import os
 import sys
 import json
+import secrets
 
 EXPIRE_OPTIONS = [
     ("5min", 300),
@@ -25,6 +26,8 @@ EXPIRE_OPTIONS = [
 PRIVATE_NETWORKS = "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,::1/128,fc00::/7"
 
 MIB = 1024 * 1024
+
+AUTH_URL = "http://127.0.0.1:9080"
 
 
 def ini_string(value):
@@ -113,12 +116,48 @@ write_file("privatebin/php.ini", "".join([
 # X-Forwarded-For becomes a list behind Traefik trusted proxies. Reading it from the
 # right, the first public address is the visitor: a forged value further left is ignored.
 real_ip = "".join(f"set_real_ip_from {network};\n" for network in PRIVATE_NETWORKS.split(","))
-write_file("privatebin/nginx.conf", "".join([
+nginx_conf = "".join([
     f"client_max_body_size {body_limit}M;\n",
     real_ip,
     "real_ip_header X-Forwarded-For;\n",
     "real_ip_recursive on;\n",
-]))
+])
+if settings["ldap_domain"]:
+    # The sidecar decides: creating needs a session, reading a link does not
+    nginx_conf += f"""
+auth_request /_auth/check;
+error_page 401 = @login;
+location = /_auth/check {{
+    internal;
+    proxy_pass {AUTH_URL};
+    proxy_pass_request_body off;
+    proxy_set_header Content-Length "";
+    proxy_set_header X-Original-Method $request_method;
+    proxy_set_header X-Original-URI $request_uri;
+}}
+location /_auth/ {{
+    auth_request off;
+    proxy_pass {AUTH_URL};
+    proxy_set_header X-Real-IP $remote_addr;
+}}
+location @login {{
+    # The PrivateBin script expects an error, a browser expects the login page
+    if ($request_method !~ ^(GET|HEAD)$) {{
+        return 401;
+    }}
+    # A relative Location keeps the public host name instead of the pod port
+    absolute_redirect off;
+    return 302 /_auth/login;
+}}
+"""
+write_file("privatebin/nginx.conf", nginx_conf)
+
+# Signs the login sessions: keep it out of Redis and out of the backup
+if not os.path.isfile("privatebin/session.env"):
+    with open("privatebin/session.env.tmp", "w") as fo:
+        os.fchmod(fo.fileno(), 0o600)
+        fo.write(f"SESSION_SECRET={secrets.token_hex(32)}\n")
+    os.replace("privatebin/session.env.tmp", "privatebin/session.env")
 
 state_dir = os.environ.get("AGENT_STATE_DIR", os.getcwd())
 if os.path.isfile("privatebin/icon.svg"):

@@ -21,7 +21,8 @@
             "language_selection": true,
             "language_default": "auto",
             "private_creators": true,
-            "rate_limit": 30
+            "rate_limit": 30,
+            "ldap_domain": "ad.example.org"
         }
     ],
     "type": "object",
@@ -42,7 +43,8 @@
         "language_selection",
         "language_default",
         "private_creators",
-        "rate_limit"
+        "rate_limit",
+        "ldap_domain"
     ],
     "definitions": {
         "expire": {
@@ -151,6 +153,10 @@
                     "maximum": 300
                 }
             ]
+        },
+        "ldap_domain": {
+            "type": "string",
+            "description": "User domain whose users must log in to create documents and comments, empty to disable the login. Links stay readable without login."
         }
     }
 }

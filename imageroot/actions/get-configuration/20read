@@ -9,6 +9,7 @@ import os
 import sys
 import json
 import agent
+from agent.ldapproxy import Ldapproxy
 
 with open(os.environ["AGENT_INSTALL_DIR"] + "/etc/privatebin-defaults.json") as fi:
     settings = json.load(fi)
@@ -24,6 +25,7 @@ config = {
     "lets_encrypt": route.get('lets_encrypt', False),
     "route_configured": bool(route),
     "logo_set": os.path.isfile("privatebin/icon.svg"),
+    "ldap_domain_list": sorted(Ldapproxy().get_domains_list()),
     **settings,
 }
 

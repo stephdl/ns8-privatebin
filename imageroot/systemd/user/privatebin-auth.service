@@ -1,0 +1,35 @@
+#
+# Copyright (C) 2026 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+# LDAP login asked by nginx before each request, idle when no user domain is set
+
+[Unit]
+Description=Podman privatebin-auth.service
+BindsTo=privatebin.service
+After=privatebin.service
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%S/state/environment
+WorkingDirectory=%S/state
+Restart=always
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/privatebin-auth.pid %t/privatebin-auth.ctr-id
+ExecStartPre=/usr/local/bin/runagent discover-ldap
+ExecStart=/usr/bin/podman run --conmon-pidfile %t/privatebin-auth.pid \
+    --cidfile %t/privatebin-auth.ctr-id --cgroups=no-conmon \
+    --pod-id-file %t/privatebin.pod-id --replace -d --name privatebin-auth \
+    --read-only \
+    --env-file=%S/state/discovery_ldap.env \
+    --env-file=%S/state/privatebin/session.env \
+    ${PRIVATEBIN_AUTH_IMAGE}
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/privatebin-auth.ctr-id -t 10
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/privatebin-auth.ctr-id
+SyslogIdentifier=%u
+PIDFile=%t/privatebin-auth.pid
+Type=forking
+
+[Install]
+WantedBy=default.target

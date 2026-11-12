@@ -90,7 +90,14 @@
               {{ $t("settings.document_creation") }}
             </h4>
             <NsInlineNotification
-              v-if="isPrivateCreators"
+              v-if="isLdapEnabled"
+              kind="info"
+              :title="$t('settings.creation_ldap_title')"
+              :description="$t('settings.creation_ldap_description')"
+              :showCloseButton="false"
+            />
+            <NsInlineNotification
+              v-else-if="isPrivateCreators"
               kind="info"
               :title="$t('settings.creation_private_title')"
               :description="$t('settings.creation_private_description')"
@@ -160,6 +167,50 @@
                 :title="$t('settings.no_limit_title')"
                 :description="$t('settings.no_limit_description')"
                 :showCloseButton="false"
+              />
+            </template>
+            <NsToggle
+              value="ldapEnabled"
+              :label="$t('settings.ldap_login')"
+              v-model="isLdapEnabled"
+              :disabled="stillLoading"
+              class="mg-bottom"
+            >
+              <template #tooltip>
+                {{ $t("settings.ldap_login_tooltip") }}
+              </template>
+              <template slot="text-left">{{
+                $t("settings.disabled")
+              }}</template>
+              <template slot="text-right">{{
+                $t("settings.enabled")
+              }}</template>
+            </NsToggle>
+            <template v-if="isLdapEnabled">
+              <NsInlineNotification
+                v-if="!ldapDomainList.length && !loading.getConfiguration"
+                kind="warning"
+                :title="$t('settings.no_domain_title')"
+                :description="$t('settings.no_domain_description')"
+                :actionLabel="$t('settings.go_to_domains')"
+                @action="goToDomains"
+                :showCloseButton="false"
+              />
+              <!-- NsComboBox keeps its first options: rebuild it when the domain list changes -->
+              <NsComboBox
+                v-else
+                :key="ldapDomainList.join(',')"
+                v-model="ldapDomain"
+                :options="domainOptions"
+                :title="$t('settings.ldap_domain')"
+                :label="$t('settings.choose_ldap_domain')"
+                :helper-text="$t('settings.ldap_domain_helper')"
+                :invalid-message="$t(error.ldap_domain)"
+                :disabled="stillLoading"
+                auto-filter
+                auto-highlight
+                class="mg-bottom maxwidth"
+                ref="ldap_domain"
               />
             </template>
 
@@ -558,6 +609,9 @@ export default {
       isPrivateCreators: true,
       isRateLimitEnabled: true,
       rateLimit: "30",
+      isLdapEnabled: false,
+      ldapDomain: "",
+      ldapDomainList: [],
       loading: {
         getConfiguration: false,
         configureModule: false,
@@ -578,6 +632,7 @@ export default {
         size_limit: "",
         rate_limit: "",
         language_default: "",
+        ldap_domain: "",
       },
     };
   },
@@ -597,6 +652,13 @@ export default {
         this.configuredHost &&
         !this.isRouteConfigured
       );
+    },
+    domainOptions() {
+      return this.ldapDomainList.map((domain) => ({
+        name: domain,
+        label: domain,
+        value: domain,
+      }));
     },
     expireOptions() {
       return EXPIRE_VALUES.map((value) => ({
@@ -637,9 +699,14 @@ export default {
     goToCertificates() {
       this.core.$router.push("/settings/tls-certificates");
     },
+    goToDomains() {
+      this.core.$router.push("/domains");
+    },
     openAdvancedFor(field) {
       // a hidden field cannot show its error nor take the focus
-      if (!["host", "lets_encrypt", "rate_limit"].includes(field)) {
+      if (
+        !["host", "lets_encrypt", "rate_limit", "ldap_domain"].includes(field)
+      ) {
         this.$set(this.toggleAccordion, 0, true);
       }
     },
@@ -777,6 +844,9 @@ export default {
       this.isPrivateCreators = config.private_creators;
       this.isRateLimitEnabled = config.rate_limit > 0;
       this.rateLimit = String(config.rate_limit > 0 ? config.rate_limit : 30);
+      this.ldapDomainList = config.ldap_domain_list;
+      this.ldapDomain = config.ldap_domain;
+      this.isLdapEnabled = Boolean(config.ldap_domain);
 
       this.loading.getConfiguration = false;
       this.focusElement("host");
@@ -797,6 +867,9 @@ export default {
 
       if (!this.host) {
         fail("host", "common.required");
+      }
+      if (this.isLdapEnabled && !this.ldapDomain) {
+        fail("ldap_domain", "common.required");
       }
       if (!this.expireMax) {
         fail("expire_max", "common.required");
@@ -875,6 +948,7 @@ export default {
         language_default: this.languageDefault,
         private_creators: this.isPrivateCreators,
         rate_limit: this.isRateLimitEnabled ? parseInt(this.rateLimit, 10) : 0,
+        ldap_domain: this.isLdapEnabled ? this.ldapDomain : "",
       };
       // without the logo key the backend keeps the current logo
       if (this.logoData) {

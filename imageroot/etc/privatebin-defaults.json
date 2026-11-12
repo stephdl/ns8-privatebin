@@ -13,5 +13,6 @@
     "language_selection": true,
     "language_default": "auto",
     "private_creators": true,
-    "rate_limit": 30
+    "rate_limit": 30,
+    "ldap_domain": ""
 }
