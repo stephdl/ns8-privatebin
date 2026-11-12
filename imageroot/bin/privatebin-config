@@ -29,6 +29,15 @@ PRIVATE_NETWORKS = "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,::1/128,
 MIB = 1024 * 1024
 
 AUTH_URL = "http://127.0.0.1:9080"
+# Same as the PHP location of the upstream site.conf. SCRIPT_NAME is fixed,
+# because the protected location renames the URI.
+FASTCGI = """    include /etc/nginx/location.d/*.conf;
+    fastcgi_pass unix:/run/php-fpm.sock;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param SERVER_SOFTWARE "";
+"""
 
 
 def ini_string(value):
@@ -125,10 +134,23 @@ nginx_conf = "".join([
     "real_ip_recursive on;\n",
 ])
 if settings["ldap_domain"]:
-    # The sidecar decides: creating needs a session, reading a link does not
+    # Every PHP request ends in /index.php (index and try_files). Only the
+    # editor and the writes ask the sidecar: links and assets keep working
+    # while it restarts.
     nginx_conf += f"""
-auth_request /_auth/check;
-error_page 401 = @login;
+location = /index.php {{
+    if ($request_method !~ ^(GET|HEAD)$) {{
+        rewrite ^ /_login_required last;
+    }}
+    if ($args = "") {{
+        rewrite ^ /_login_required last;
+    }}
+{FASTCGI}}}
+location = /_login_required {{
+    internal;
+    auth_request /_auth/check;
+    error_page 401 = @login;
+{FASTCGI}}}
 location = /_auth/check {{
     internal;
     proxy_pass {AUTH_URL};
@@ -138,7 +160,6 @@ location = /_auth/check {{
     proxy_set_header X-Original-URI $request_uri;
 }}
 location /_auth/ {{
-    auth_request off;
     proxy_pass {AUTH_URL};
     proxy_set_header X-Real-IP $remote_addr;
 }}
