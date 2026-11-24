@@ -156,6 +156,9 @@ Check if an old zero delay becomes 30 seconds
     Run task    module/${module_id}/configure-module    {${BASE_CONFIG}}
 
 Check if a document is stored
+    # The previous configure-module restarted PrivateBin
+    Wait Until Keyword Succeeds    20 times    3 seconds
+    ...    PrivateBin answers
     # A well formed body from an address with no delay yet
     ${port} =    Execute Command    runagent -m ${module_id} sh -c 'grep ^TCP_PORT= environment | cut -d= -f2'
     ${body} =    Set Variable    {"v":2,"adata":[["AAAAAAAAAAAAAAAAAAAAAA==","AAAAAAAAAAA=",100000,256,128,"aes","gcm","zlib"],"plaintext",0,0],"ct":"${CIPHERTEXT}","meta":{"expire":"1week"}}
